@@ -16,8 +16,6 @@ public class ITSPhase extends AbstractPhase {
 
     public ITSPhase(Scene scene) {
         super(scene);
-        
-        this.stateSpace = getPhase(StateSpaceTransformer.class).getStateSpace();
     }
 
     @Override
@@ -27,7 +25,9 @@ public class ITSPhase extends AbstractPhase {
 
     @Override
     public void executePhase() throws IOException {
-        its = new ITS(stateSpace);
+        this.stateSpace = getPhase(StateSpaceTransformer.class).getStateSpace();
+
+        this.its = new ITS(stateSpace);
 
 
         // hack just to test if it works
