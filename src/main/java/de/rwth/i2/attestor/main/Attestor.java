@@ -2,6 +2,7 @@ package de.rwth.i2.attestor.main;
 
 import de.rwth.i2.attestor.phases.commandLineInterface.CommandLinePhase;
 import de.rwth.i2.attestor.phases.counterexamples.CounterexampleGenerationPhase;
+import de.rwth.i2.attestor.phases.its.ITSPhase;
 import de.rwth.i2.attestor.phases.modelChecking.ModelCheckingPhase;
 import de.rwth.i2.attestor.phases.parser.ParseContractsPhase;
 import de.rwth.i2.attestor.phases.parser.ParseGrammarPhase;
@@ -55,6 +56,7 @@ public class Attestor extends AbstractAttestor {
                 .addPhase(new GrammarRefinementPhase(scene))
                 .addPhase(new AbstractionPreprocessingPhase(scene))
                 .addPhase(new RecursiveStateSpaceGenerationPhase(scene))
+                .addPhase(new ITSPhase(scene))
                 .addPhase(new ModelCheckingPhase(scene))
                 .addPhase(new CounterexampleGenerationPhase(scene))
                 .addPhase( new ReportGenerationPhase(registry, scene) )
