@@ -12,7 +12,7 @@ public class ITS {
 
     private StateSpace stateSpace;
 
-    private Set<Transition> transitions = new HashSet<>();
+    private Set<Transition> transitions = new LinkedHashSet<>();
 
 
     public ITS(StateSpace stateSpace) {
@@ -68,10 +68,10 @@ public class ITS {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(String.format("START: %d;\n", INITIAL_STATE));
+        sb.append(String.format("START: %d;\n\n", INITIAL_STATE));
 
         for (Transition t : transitions) {
-            sb.append(t);
+            sb.append(t).append("\n\n");
         }
 
         return sb.toString();
