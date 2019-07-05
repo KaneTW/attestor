@@ -1,6 +1,7 @@
 package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values;
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
+import de.rwth.i2.attestor.its.IntExpr;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.types.Type;
 
@@ -23,4 +24,6 @@ public interface Value {
      * can be evaluated.
      */
     ViolationPoints getPotentialViolationPoints();
+
+    IntExpr asIntExpr();
 }

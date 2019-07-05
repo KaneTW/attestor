@@ -4,15 +4,14 @@ package de.rwth.i2.attestor.its;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 
 import java.util.Objects;
-import java.util.Set;
 
 public class Transition {
 
-    public int from;
-    public int to;
-    public ProgramState ps;
+    private final int from;
+    private final int to;
+    private final Action ps;
 
-    public Transition(int from, int to, ProgramState ps) {
+    public Transition(int from, int to, Action ps) {
         this.from = from;
         this.to = to;
         this.ps = ps;

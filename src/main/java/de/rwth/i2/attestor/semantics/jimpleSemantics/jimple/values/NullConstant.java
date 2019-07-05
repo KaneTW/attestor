@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values;
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
+import de.rwth.i2.attestor.its.IntExpr;
+import de.rwth.i2.attestor.its.LitIntExpr;
 import de.rwth.i2.attestor.semantics.util.Constants;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.types.Type;
@@ -48,4 +50,8 @@ public class NullConstant implements Value {
         return ViolationPoints.getEmptyViolationPoints();
     }
 
+    @Override
+    public IntExpr asIntExpr() {
+        return new LitIntExpr(0);
+    }
 }

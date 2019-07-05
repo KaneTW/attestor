@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values;
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
+import de.rwth.i2.attestor.its.ITSVar;
+import de.rwth.i2.attestor.its.IntExpr;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.types.Type;
 import org.apache.logging.log4j.LogManager;
@@ -74,4 +76,8 @@ public class Local implements SettableValue {
         return ViolationPoints.getEmptyViolationPoints();
     }
 
+    @Override
+    public IntExpr asIntExpr() {
+        return new ITSVar(this);
+    }
 }

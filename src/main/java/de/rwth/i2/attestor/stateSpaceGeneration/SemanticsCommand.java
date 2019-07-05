@@ -1,6 +1,9 @@
 package de.rwth.i2.attestor.stateSpaceGeneration;
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
+import de.rwth.i2.attestor.its.Action;
+import de.rwth.i2.attestor.its.Transition;
+import de.rwth.i2.attestor.util.Pair;
 
 import java.util.Collection;
 import java.util.Set;
@@ -37,5 +40,11 @@ public interface SemanticsCommand {
      * @return true, if the statement always requires canonicalization
      */
     boolean needsCanonicalization();
+
+    /**
+     * Given a program state, computes the effects of a single step of the abstract program semantics onto an ITS transition.
+     * @return All transitions that can occur from executing the semantics on this state
+     */
+    Collection<Pair<Collection<Action>, ProgramState>> computeITSActions(ProgramState programState);
 
 }
