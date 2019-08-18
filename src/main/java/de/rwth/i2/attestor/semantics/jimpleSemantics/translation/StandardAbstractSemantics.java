@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.semantics.jimpleSemantics.translation;
 
 import de.rwth.i2.attestor.graph.SelectorLabel;
+import de.rwth.i2.attestor.its.CompOp;
+import de.rwth.i2.attestor.its.IntOp;
 import de.rwth.i2.attestor.main.scene.SceneObject;
 import de.rwth.i2.attestor.procedures.Method;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.*;
@@ -8,14 +10,12 @@ import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.invoke.In
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.invoke.InvokeHelper;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.invoke.StaticInvokeHelper;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.*;
-import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.boolExpr.EqualExpr;
-import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.boolExpr.UnequalExpr;
+import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.boolExpr.*;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.types.TypeNames;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import soot.Unit;
-import soot.jimple.InstanceFieldRef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,6 +135,35 @@ public class StandardAbstractSemantics extends SceneObject implements JimpleToAb
         }
         if (input instanceof soot.jimple.NeExpr) {
             return translateUnequalExpr(input);
+        }
+        if (input instanceof soot.jimple.LeExpr) {
+            return translateLeExpr(input);
+        }
+        if (input instanceof soot.jimple.LtExpr) {
+            return translateLtExpr(input);
+        }
+        if (input instanceof soot.jimple.GeExpr) {
+            return translateGeExpr(input);
+        }
+        if (input instanceof soot.jimple.GtExpr) {
+            return translateGtExpr(input);
+        }
+
+
+        if (input instanceof soot.jimple.AddExpr) {
+            return translateAddExpr(input);
+        }
+        if (input instanceof soot.jimple.SubExpr) {
+            return translateSubExpr(input);
+        }
+        if (input instanceof soot.jimple.MulExpr) {
+            return translateMulExpr(input);
+        }
+        if (input instanceof soot.jimple.DivExpr) {
+            return translateDivExpr(input);
+        }
+        if (input instanceof soot.jimple.RemExpr) {
+            return translateRemExpr(input);
         }
         logger.trace("StandardSemantic not applicable. Using next level..");
         return nextLevel.translateValue(input);
@@ -291,6 +320,7 @@ public class StandardAbstractSemantics extends SceneObject implements JimpleToAb
         return new IfStmt(this, condition, truePC, falsePC, LiveVariableHelper.extractLiveVariables(input));
     }
 
+
     /**
      * Translates a Jimple unequal expression.
      *
@@ -395,5 +425,69 @@ public class StandardAbstractSemantics extends SceneObject implements JimpleToAb
         logger.trace("Recognized IntConstant with value " + val.value);
         return new IntConstant(val.value);
     }
+
+    private Value translateLeExpr(soot.Value input) {
+        soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
+        Value leftExpr = topLevel.translateValue(expr.getOp1());
+        Value rightExpr = topLevel.translateValue(expr.getOp2());
+        return new CompareExpr(leftExpr, rightExpr, CompOp.LessEqual);
+    }
+
+    private Value translateLtExpr(soot.Value input) {
+        soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
+        Value leftExpr = topLevel.translateValue(expr.getOp1());
+        Value rightExpr = topLevel.translateValue(expr.getOp2());
+        return new CompareExpr(leftExpr, rightExpr, CompOp.Less);
+    }
+
+    private Value translateGeExpr(soot.Value input) {
+        soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
+        Value leftExpr = topLevel.translateValue(expr.getOp1());
+        Value rightExpr = topLevel.translateValue(expr.getOp2());
+        return new CompareExpr(leftExpr, rightExpr, CompOp.GreaterEqual);
+    }
+
+    private Value translateGtExpr(soot.Value input) {
+        soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
+        Value leftExpr = topLevel.translateValue(expr.getOp1());
+        Value rightExpr = topLevel.translateValue(expr.getOp2());
+        return new CompareExpr(leftExpr, rightExpr, CompOp.Greater);
+    }
+
+    private Value translateAddExpr(soot.Value input) {
+        soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
+        Value leftExpr = topLevel.translateValue(expr.getOp1());
+        Value rightExpr = topLevel.translateValue(expr.getOp2());
+        return new ArithExpr(leftExpr, rightExpr, IntOp.PLUS);
+    }
+
+    private Value translateSubExpr(soot.Value input) {
+        soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
+        Value leftExpr = topLevel.translateValue(expr.getOp1());
+        Value rightExpr = topLevel.translateValue(expr.getOp2());
+        return new ArithExpr(leftExpr, rightExpr, IntOp.MINUS);
+    }
+
+    private Value translateMulExpr(soot.Value input) {
+        soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
+        Value leftExpr = topLevel.translateValue(expr.getOp1());
+        Value rightExpr = topLevel.translateValue(expr.getOp2());
+        return new ArithExpr(leftExpr, rightExpr, IntOp.MUL);
+    }
+
+    private Value translateDivExpr(soot.Value input) {
+        soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
+        Value leftExpr = topLevel.translateValue(expr.getOp1());
+        Value rightExpr = topLevel.translateValue(expr.getOp2());
+        return new ArithExpr(leftExpr, rightExpr, IntOp.DIV);
+    }
+
+    private Value translateRemExpr(soot.Value input) {
+        soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
+        Value leftExpr = topLevel.translateValue(expr.getOp1());
+        Value rightExpr = topLevel.translateValue(expr.getOp2());
+        return new ArithExpr(leftExpr, rightExpr, IntOp.MOD);
+    }
+
 
 }
