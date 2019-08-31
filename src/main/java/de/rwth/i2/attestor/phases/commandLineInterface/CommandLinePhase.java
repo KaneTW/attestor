@@ -41,7 +41,7 @@ public class CommandLinePhase extends AbstractPhase
     @Override
     public String getName() {
 
-        return "Command Line Interface";
+        return "Action Line Interface";
     }
 
     @Override

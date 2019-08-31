@@ -16,6 +16,7 @@ import de.rwth.i2.attestor.types.TypeNames;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import soot.Unit;
+import soot.jimple.InstanceFieldRef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,6 +129,17 @@ public class StandardAbstractSemantics extends SceneObject implements JimpleToAb
         }
         if (input instanceof soot.jimple.IntConstant) {
             return translateIntConstant(input);
+        }
+
+
+        if (input instanceof soot.jimple.AndExpr) {
+            return translateAndExpr(input);
+        }
+        if (input instanceof soot.jimple.OrExpr) {
+            return translateOrExpr(input);
+        }
+        if (input instanceof soot.jimple.NegExpr) {
+            return translateNegExpr(input);
         }
 
         if (input instanceof soot.jimple.EqExpr) {
@@ -458,36 +470,64 @@ public class StandardAbstractSemantics extends SceneObject implements JimpleToAb
         soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
         Value leftExpr = topLevel.translateValue(expr.getOp1());
         Value rightExpr = topLevel.translateValue(expr.getOp2());
-        return new ArithExpr(leftExpr, rightExpr, IntOp.PLUS);
+        Type type = topLevel.translateType(expr.getType());
+        return new ArithExpr(leftExpr, rightExpr, IntOp.PLUS, type);
     }
 
     private Value translateSubExpr(soot.Value input) {
         soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
         Value leftExpr = topLevel.translateValue(expr.getOp1());
         Value rightExpr = topLevel.translateValue(expr.getOp2());
-        return new ArithExpr(leftExpr, rightExpr, IntOp.MINUS);
+        Type type = topLevel.translateType(expr.getType());
+        return new ArithExpr(leftExpr, rightExpr, IntOp.MINUS, type);
     }
 
     private Value translateMulExpr(soot.Value input) {
         soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
         Value leftExpr = topLevel.translateValue(expr.getOp1());
         Value rightExpr = topLevel.translateValue(expr.getOp2());
-        return new ArithExpr(leftExpr, rightExpr, IntOp.MUL);
+        Type type = topLevel.translateType(expr.getType());
+        return new ArithExpr(leftExpr, rightExpr, IntOp.MUL, type);
     }
 
     private Value translateDivExpr(soot.Value input) {
         soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
         Value leftExpr = topLevel.translateValue(expr.getOp1());
         Value rightExpr = topLevel.translateValue(expr.getOp2());
-        return new ArithExpr(leftExpr, rightExpr, IntOp.DIV);
+        Type type = topLevel.translateType(expr.getType());
+        return new ArithExpr(leftExpr, rightExpr, IntOp.DIV, type);
     }
 
     private Value translateRemExpr(soot.Value input) {
         soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
         Value leftExpr = topLevel.translateValue(expr.getOp1());
         Value rightExpr = topLevel.translateValue(expr.getOp2());
-        return new ArithExpr(leftExpr, rightExpr, IntOp.MOD);
+        Type type = topLevel.translateType(expr.getType());
+        return new ArithExpr(leftExpr, rightExpr, IntOp.MOD, type);
     }
 
+    private Value translateAndExpr(soot.Value input) {
+        soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
+        BoolValue leftExpr = (BoolValue)topLevel.translateValue(expr.getOp1());
+        BoolValue rightExpr = (BoolValue)topLevel.translateValue(expr.getOp2());
+
+        return new AndExpr(leftExpr, rightExpr);
+    }
+
+    private Value translateOrExpr(soot.Value input) {
+        soot.jimple.BinopExpr expr = (soot.jimple.BinopExpr) input;
+        BoolValue leftExpr = (BoolValue)topLevel.translateValue(expr.getOp1());
+        BoolValue rightExpr = (BoolValue)topLevel.translateValue(expr.getOp2());
+
+        return new OrExpr(leftExpr, rightExpr);
+    }
+
+    private Value translateNegExpr(soot.Value input) {
+        soot.jimple.NegExpr expr = (soot.jimple.NegExpr) input;
+        BoolValue tlExpr = (BoolValue)topLevel.translateValue(expr.getOp());
+
+
+        return new NotExpr(tlExpr);
+    }
 
 }

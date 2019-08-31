@@ -3,6 +3,7 @@ package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements;
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
 import de.rwth.i2.attestor.its.Action;
+import de.rwth.i2.attestor.its.AssignAction;
 import de.rwth.i2.attestor.main.scene.SceneObject;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.ConcreteValue;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.NullPointerDereferenceException;
@@ -15,8 +16,7 @@ import de.rwth.i2.attestor.util.SingleElementUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 
 /**
  * AssignStmts model assignments of locals or fields to values e.g. x.y = z
@@ -102,13 +102,6 @@ public class AssignStmt extends Statement {
         return SingleElementUtil.createSet(result);
     }
 
-    @Override
-    public Collection<Pair<Collection<Action>, ProgramState>> computeITSActions(ProgramState programState) {
-        programState = computeSuccessors(programState).iterator().next();
-
-
-    }
-
     public String toString() {
 
         return lhs.toString() + " = " + rhs.toString() + ";";
@@ -131,4 +124,16 @@ public class AssignStmt extends Statement {
         return false;
     }
 
+    @Override
+    public Collection<Pair<Collection<Action>, ProgramState>> computeITSActions(ProgramState programState) {
+        Collection<ProgramState> succs = computeSuccessors(programState);
+
+        List<Pair<Collection<Action>, ProgramState>> out = new LinkedList<>();
+
+        for (ProgramState succ : succs) {
+            out.add(new Pair<>(SingleElementUtil.createSet(new AssignAction(lhs, rhs.asITSTerm())), succ));
+        }
+
+        return out;
+    }
 }

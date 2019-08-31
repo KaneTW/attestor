@@ -5,7 +5,7 @@ public enum IntOp {
 
     @Override
     public String toString() {
-        switch(this) {
+        switch (this) {
             case PLUS:
                 return "+";
             case MINUS:
@@ -17,5 +17,6 @@ public enum IntOp {
             case MOD:
                 return "%";
         }
+        throw new IllegalArgumentException("Missing toString for IntOp." + this);
     }
 }

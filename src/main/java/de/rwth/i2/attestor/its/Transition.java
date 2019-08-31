@@ -1,27 +1,38 @@
 package de.rwth.i2.attestor.its;
 
 
-import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
-
+import java.util.Collection;
 import java.util.Objects;
 
 public class Transition {
 
     private final int from;
     private final int to;
-    private final Action ps;
+    private final Collection<Action> actions;
 
-    public Transition(int from, int to, Action ps) {
+    public int getFrom() {
+        return from;
+    }
+
+    public int getTo() {
+        return to;
+    }
+
+    public Collection<Action> getActions() {
+        return actions;
+    }
+
+    public Transition(int from, int to, Collection<Action> actions) {
         this.from = from;
         this.to = to;
-        this.ps = ps;
+        this.actions = actions;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o instanceof Transition) {
             Transition t = (Transition) o;
-            return t.from == from && t.to == to && ps.equals(t.ps);
+            return t.from == from && t.to == to && actions.equals(t.actions);
         }
 
         return false;
@@ -29,7 +40,7 @@ public class Transition {
 
     @Override
     public int hashCode() {
-        return Objects.hash(from, to, ps);
+        return Objects.hash(from, to, actions);
     }
 
     @Override
@@ -38,6 +49,8 @@ public class Transition {
     }
 
     private String getConditions() {
-        return "";
+        StringBuilder builder = new StringBuilder();
+        actions.forEach(action -> builder.append(action.toString() + "\n"));
+        return builder.toString();
     }
 }

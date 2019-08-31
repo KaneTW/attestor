@@ -24,5 +24,6 @@ public enum CompOp {
             case Greater:
                 return ">";
         }
+        throw new IllegalArgumentException("Missing toString for IntOp." + this);
     }
 }

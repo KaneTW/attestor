@@ -1,6 +1,7 @@
 package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.boolExpr;
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
+import de.rwth.i2.attestor.its.*;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.ConcreteValue;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.NullPointerDereferenceException;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.Value;
@@ -15,7 +16,7 @@ import org.apache.logging.log4j.Logger;
  *
  * @author Hannah Arndt
  */
-public class UnequalExpr implements Value {
+public class UnequalExpr implements BoolValue {
 
     private static final Logger logger = LogManager.getLogger("UnequalExpr");
 
@@ -30,6 +31,8 @@ public class UnequalExpr implements Value {
 
     private final ViolationPoints potentialViolationPoints;
 
+    private final ITSCompareFormula formula;
+
     public UnequalExpr(Value leftExpr, Value rightExpr) {
 
         this.leftExpr = leftExpr;
@@ -37,6 +40,8 @@ public class UnequalExpr implements Value {
         this.potentialViolationPoints = new ViolationPoints();
         this.potentialViolationPoints.addAll(leftExpr.getPotentialViolationPoints());
         this.potentialViolationPoints.addAll(rightExpr.getPotentialViolationPoints());
+
+        this.formula = new ITSCompareFormula(leftExpr.asITSTerm(), rightExpr.asITSTerm(), CompOp.NotEqual);
     }
 
     /**
@@ -85,7 +90,7 @@ public class UnequalExpr implements Value {
     @Override
     public Type getType() {
 
-        return Types.INT;
+        return Types.BOOL;
     }
 
     public String toString() {
@@ -99,4 +104,13 @@ public class UnequalExpr implements Value {
         return potentialViolationPoints;
     }
 
+    @Override
+    public ITSTerm asITSTerm() {
+        return new ITSNondetTerm(getType());
+    }
+
+    @Override
+    public ITSFormula asITSFormula() {
+        return formula;
+    }
 }

@@ -2,11 +2,11 @@ package de.rwth.i2.attestor.its;
 
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.SettableValue;
 
-public class ITSVar implements IntExpr {
+public class ITSVariable implements ITSTerm {
     private final SettableValue var;
     private final String formatted;
 
-    public ITSVar(SettableValue var) {
+    public ITSVariable(SettableValue var) {
         this.var = var;
 
         this.formatted = formatVar(var);

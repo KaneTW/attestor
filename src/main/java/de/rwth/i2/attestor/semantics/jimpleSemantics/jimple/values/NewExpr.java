@@ -1,8 +1,8 @@
 package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values;
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
-import de.rwth.i2.attestor.its.IntExpr;
-import de.rwth.i2.attestor.its.LitIntExpr;
+import de.rwth.i2.attestor.its.ITSTerm;
+import de.rwth.i2.attestor.its.ITSLiteral;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.types.Type;
 
@@ -60,8 +60,8 @@ public class NewExpr implements Value {
     }
 
     @Override
-    public IntExpr asIntExpr() {
+    public ITSTerm asITSTerm() {
         // Need to research this more closely.
-        return new LitIntExpr(1);
+        return new ITSLiteral(1);
     }
 }

@@ -8,24 +8,20 @@ import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.types.Type;
 import de.rwth.i2.attestor.types.Types;
 
-public class CompareExpr implements BoolValue {
-    private final Value leftExpr;
-    private final Value rightExpr;
-    private final CompOp op;
+public class NotExpr implements BoolValue {
+    private final BoolValue expr;
+
     private final ViolationPoints potentialViolationPoints;
 
-    private final ITSCompareFormula formula;
+    private final ITSNegation formula;
 
-    public CompareExpr(Value leftExpr, Value rightExpr, CompOp op) {
-        this.leftExpr = leftExpr;
-        this.rightExpr = rightExpr;
-        this.op = op;
+    public NotExpr(BoolValue expr) {
+        this.expr = expr;
 
-        this.potentialViolationPoints = new ViolationPoints();
-        this.potentialViolationPoints.addAll(leftExpr.getPotentialViolationPoints());
-        this.potentialViolationPoints.addAll(rightExpr.getPotentialViolationPoints());
+        this.potentialViolationPoints = expr.getPotentialViolationPoints();
 
-        this.formula = new ITSCompareFormula(leftExpr.asITSTerm(), rightExpr.asITSTerm(), op);
+
+        this.formula = new ITSNegation(expr.asITSFormula());
     }
 
     @Override
@@ -35,7 +31,7 @@ public class CompareExpr implements BoolValue {
 
     @Override
     public boolean needsMaterialization(ProgramState programState) {
-        return rightExpr.needsMaterialization(programState) || leftExpr.needsMaterialization(programState);
+        return expr.needsMaterialization(programState);
     }
 
     @Override

@@ -1,26 +1,25 @@
 package de.rwth.i2.attestor.its;
 
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.SettableValue;
-import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.Value;
 
 public class AssignAction implements Action {
-    private final ITSVar lhs;
-    private final IntExpr rhs;
+    private final ITSVariable lhs;
+    private final ITSTerm rhs;
 
-    public ITSVar getLhs() {
+    public ITSVariable getLhs() {
         return lhs;
     }
 
-    public IntExpr getRhs() {
+    public ITSTerm getRhs() {
         return rhs;
     }
 
-    public AssignAction(SettableValue lhs, IntExpr rhs) {
-        this.lhs = new ITSVar(lhs);
+    public AssignAction(SettableValue lhs, ITSTerm rhs) {
+        this.lhs = new ITSVariable(lhs);
         this.rhs = rhs;
     }
 
-    public AssignAction(ITSVar lhs, IntExpr rhs) {
+    public AssignAction(ITSVariable lhs, ITSTerm rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }

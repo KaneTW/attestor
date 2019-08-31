@@ -1,13 +1,13 @@
 package de.rwth.i2.attestor.its;
 
 public class AssumeAction implements Action {
-    private final CompExpr expr;
+    private final ITSFormula expr;
 
-    public AssumeAction(CompExpr expr) {
+    public AssumeAction(ITSFormula expr) {
         this.expr = expr;
     }
 
-    public CompExpr getExpr() {
+    public ITSFormula getExpr() {
         return expr;
     }
 

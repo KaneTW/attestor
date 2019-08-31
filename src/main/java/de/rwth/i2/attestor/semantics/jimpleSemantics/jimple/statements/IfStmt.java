@@ -1,21 +1,22 @@
 package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements;
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
+import de.rwth.i2.attestor.its.*;
 import de.rwth.i2.attestor.main.scene.SceneObject;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.ConcreteValue;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.NullPointerDereferenceException;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.Value;
+import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.boolExpr.BoolValue;
 import de.rwth.i2.attestor.semantics.util.Constants;
 import de.rwth.i2.attestor.semantics.util.DeadVariableEliminator;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.types.Types;
+import de.rwth.i2.attestor.util.Pair;
 import de.rwth.i2.attestor.util.SingleElementUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * IfStmt models statements like if condition goto pc
@@ -125,5 +126,26 @@ public class IfStmt extends Statement {
     @Override
     public boolean needsCanonicalization() {
         return false;
+    }
+
+    @Override
+    public Collection<Pair<Collection<Action>, ProgramState>> computeITSActions(ProgramState programState) {
+        ProgramState trueState = programState.shallowCopyUpdatePC(truePC);
+        ProgramState falseState = programState.shallowCopyUpdatePC(falsePC);
+
+        List<Pair<Collection<Action>, ProgramState>> out = new LinkedList<>();
+
+        ITSFormula condition;
+
+        if (conditionValue instanceof BoolValue) {
+            condition = ((BoolValue) conditionValue).asITSFormula();
+        } else {
+            condition = new ITSCompareFormula(conditionValue.asITSTerm(), new ITSLiteral(0), CompOp.Equal);
+        }
+
+        out.add(new Pair<>(SingleElementUtil.createSet(new AssumeAction(condition)), trueState));
+        out.add(new Pair<>(SingleElementUtil.createSet(new AssumeAction(new ITSNegation(condition))), falseState));
+
+        return out;
     }
 }
