@@ -125,15 +125,7 @@ public class AssignStmt extends Statement {
     }
 
     @Override
-    public Collection<Pair<Collection<Action>, ProgramState>> computeITSActions(ProgramState programState) {
-        Collection<ProgramState> succs = computeSuccessors(programState);
-
-        List<Pair<Collection<Action>, ProgramState>> out = new LinkedList<>();
-
-        for (ProgramState succ : succs) {
-            out.add(new Pair<>(SingleElementUtil.createSet(new AssignAction(lhs, rhs.asITSTerm())), succ));
-        }
-
-        return out;
+    public Collection<Action> computeITSActions(ProgramState current, ProgramState next) {
+        return SingleElementUtil.createSet(new AssignAction(lhs, rhs.asITSTerm()));
     }
 }

@@ -3,6 +3,8 @@ package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements;
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
 import de.rwth.i2.attestor.its.Action;
+import de.rwth.i2.attestor.its.AssignAction;
+import de.rwth.i2.attestor.its.ITSNondetTerm;
 import de.rwth.i2.attestor.main.scene.SceneObject;
 import de.rwth.i2.attestor.procedures.Method;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.invoke.InvokeCleanup;
@@ -16,9 +18,7 @@ import de.rwth.i2.attestor.util.SingleElementUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * AssignInvoke models statements of the form x = foo(); or x = bar(3, name);
@@ -141,7 +141,8 @@ public class AssignInvoke extends Statement implements InvokeCleanup {
     }
 
     @Override
-    public Collection<Pair<Collection<Action>, ProgramState>> computeITSActions(ProgramState programState) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Collection<Action> computeITSActions(ProgramState current, ProgramState next) {
+        System.out.println("AssignInvoke not implemented yet");
+        return SingleElementUtil.createSet(new AssignAction(lhs, new ITSNondetTerm(lhs.getType())));
     }
 }

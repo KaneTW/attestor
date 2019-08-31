@@ -129,11 +129,7 @@ public class IfStmt extends Statement {
     }
 
     @Override
-    public Collection<Pair<Collection<Action>, ProgramState>> computeITSActions(ProgramState programState) {
-        ProgramState trueState = programState.shallowCopyUpdatePC(truePC);
-        ProgramState falseState = programState.shallowCopyUpdatePC(falsePC);
-
-        List<Pair<Collection<Action>, ProgramState>> out = new LinkedList<>();
+    public Collection<Action> computeITSActions(ProgramState current, ProgramState next) {
 
         ITSFormula condition;
 
@@ -143,9 +139,16 @@ public class IfStmt extends Statement {
             condition = new ITSCompareFormula(conditionValue.asITSTerm(), new ITSLiteral(0), CompOp.Equal);
         }
 
-        out.add(new Pair<>(SingleElementUtil.createSet(new AssumeAction(condition)), trueState));
-        out.add(new Pair<>(SingleElementUtil.createSet(new AssumeAction(new ITSNegation(condition))), falseState));
+        if (next.getProgramCounter() == truePC) {
+            // blank
+        } else if (next.getProgramCounter() == falsePC) {
+            condition = new ITSNegation(condition);
+        } else {
+            throw new IllegalArgumentException("Expected to compute ITS action for state " + next.getStateSpaceId() + ", but its PC is not a possible successor" );
+        }
 
-        return out;
+
+        return SingleElementUtil.createSet(new AssumeAction(condition));
+
     }
 }

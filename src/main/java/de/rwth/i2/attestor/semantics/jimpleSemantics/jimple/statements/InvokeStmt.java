@@ -100,8 +100,10 @@ public class InvokeStmt extends Statement implements InvokeCleanup {
         return true;
     }
 
+    /*
     @Override
     public Collection<Pair<Collection<Action>, ProgramState>> computeITSActions(ProgramState programState) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
+     */
 }

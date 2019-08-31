@@ -1,5 +1,6 @@
 package de.rwth.i2.attestor.its;
 
+import de.rwth.i2.attestor.semantics.TerminalStatement;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.Statement;
 import de.rwth.i2.attestor.stateSpaceGeneration.*;
 import de.rwth.i2.attestor.util.Pair;
@@ -42,7 +43,7 @@ public class ITS {
     private int getStateId(ProgramState ps) {
         int id = ps.getStateSpaceId();
         if (id < 0) {
-            throw new IllegalArgumentException("Attempted to ITS convert an invalid program state");
+            throw new IllegalArgumentException("Attempted to ITS convert an invalid program state: " + ps.getStateSpaceId());
         }
 
         return id + 1;
@@ -50,12 +51,12 @@ public class ITS {
 
     private void fillITS(Transition t, ProgramState ps) {
         SemanticsCommand cmd = program.getStatement(ps.getProgramCounter());
-
         if (cmd instanceof Statement) {
             Statement stmt = (Statement) cmd;
-            for (Pair<Collection<Action>, ProgramState> pair : stmt.computeITSActions(ps)) {
-                ProgramState succ = pair.second();
-                Transition candidate = new Transition(t.getTo(), getStateId(succ), pair.first());
+            for (ProgramState succ : stateSpace.getControlFlowSuccessorsOf(ps)) {
+                Collection<Action> actions = stmt.computeITSActions(ps, succ);
+
+                Transition candidate = new Transition(t.getTo(), getStateId(succ), actions);
 
                 if (transitions.contains(candidate)) {
                     // avoid cyclic loops
@@ -66,9 +67,10 @@ public class ITS {
 
                 fillITS(candidate, succ);
 
-            }
-        }
-        else {
+                }
+        } else if (cmd instanceof TerminalStatement) {
+            // blank
+        } else {
             throw new UnsupportedOperationException("Can't handle non-Statements");
         }
     }

@@ -3,6 +3,7 @@ package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements;
 
 import de.rwth.i2.attestor.its.Action;
 import de.rwth.i2.attestor.main.scene.SceneObject;
+import de.rwth.i2.attestor.stateSpaceGeneration.Program;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.stateSpaceGeneration.SemanticsCommand;
 import de.rwth.i2.attestor.util.Pair;
@@ -26,19 +27,12 @@ public abstract class Statement extends SceneObject implements SemanticsCommand 
 
 
     /**
-     * Given a program state, computes the effects of a single step of the abstract program semantics onto an ITS transition.
-     * @return All transitions that can occur from executing the semantics on this state
+     * Given a current program state and a target, computes the effects of a single step of the abstract program semantics onto an ITS transition.
+     * @return A transition that can occur from executing the semantics on this state
      */
-    public Collection<Pair<Collection<Action>, ProgramState>> computeITSActions(ProgramState programState) {
-        Collection<ProgramState> succs = computeSuccessors(programState);
-
-        List<Pair<Collection<Action>, ProgramState>> out = new LinkedList<>();
-
-        for (ProgramState succ : succs) {
-            out.add(new Pair<>(Collections.emptySet(), succ));
-        }
-
-        return out;
+    // HACKHACK: can't re-run computeSuccessors, so gotta do this weird stuff
+    public Collection<Action> computeITSActions(ProgramState current, ProgramState next) {
+        return Collections.emptySet();
     }
 
 }
