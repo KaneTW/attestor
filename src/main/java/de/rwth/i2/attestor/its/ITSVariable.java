@@ -18,7 +18,7 @@ public class ITSVariable implements ITSTerm {
 
 
     private static String formatVar(SettableValue var) {
-        return var.toString().replaceAll("$", "___");
+        return var.toString().replace("$", "__");
     }
 
 
