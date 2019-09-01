@@ -2,15 +2,13 @@ package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements;
 
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
-import de.rwth.i2.attestor.its.Action;
-import de.rwth.i2.attestor.its.AssignAction;
+import de.rwth.i2.attestor.graph.SelectorLabel;
+import de.rwth.i2.attestor.its.*;
 import de.rwth.i2.attestor.main.scene.SceneObject;
-import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.ConcreteValue;
-import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.NullPointerDereferenceException;
-import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.SettableValue;
-import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.Value;
+import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.*;
 import de.rwth.i2.attestor.semantics.util.DeadVariableEliminator;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
+import de.rwth.i2.attestor.types.Types;
 import de.rwth.i2.attestor.util.Pair;
 import de.rwth.i2.attestor.util.SingleElementUtil;
 import org.apache.logging.log4j.LogManager;
@@ -126,6 +124,46 @@ public class AssignStmt extends Statement {
 
     @Override
     public Collection<Action> computeITSActions(ProgramState current, ProgramState next) {
-        return SingleElementUtil.createSet(new AssignAction(lhs, rhs.asITSTerm()));
+        ITSTerm rhsTerm = rhs.asITSTerm();
+        List<Action> actions = new LinkedList<>();
+
+        // we fetch the node identifier from the heap configuration for this, if we can
+        if (rhs instanceof NewExpr) {
+            rhsTerm = extractConcreteValue(current, lhs);
+            actions.add(new AssignAction(lhs, rhsTerm));
+            actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.Greater)));
+        } else {
+            actions.add(new AssignAction(lhs, rhsTerm));
+        }
+
+        // nb: NewExpr only occurs in top level expressions
+        for (SelectorLabel label: lhs.getType().getSelectorLabels().keySet()) {
+            Field fld = new Field(Types.UNDEFINED, lhs, label);
+            ITSVariable var = new ITSVariable(fld);
+
+            try {
+                actions.add(new AssignAction(var, extractConcreteValue(current, fld)));
+            } catch (IllegalStateException ex) {
+                // if we don't have the field yet, ignore
+                continue;
+            }
+        }
+
+        return actions;
+    }
+
+    private ITSTerm extractConcreteValue(ProgramState current, Value value) {
+        ITSTerm rhsTerm = new ITSNondetTerm(value.getType());
+        // this doesn't actually work, yet
+        // TODO: ask why
+        /*
+        try {
+
+            GeneralConcreteValue concreteValue = (GeneralConcreteValue) value.evaluateOn(current);
+            rhsTerm = new ITSLiteral(concreteValue.getNode());
+        } catch (NullPointerDereferenceException ex) {
+            // blank
+        }*/
+        return rhsTerm;
     }
 }
