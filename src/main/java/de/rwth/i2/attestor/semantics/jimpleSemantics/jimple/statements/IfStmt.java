@@ -11,7 +11,6 @@ import de.rwth.i2.attestor.semantics.util.Constants;
 import de.rwth.i2.attestor.semantics.util.DeadVariableEliminator;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.types.Types;
-import de.rwth.i2.attestor.util.Pair;
 import de.rwth.i2.attestor.util.SingleElementUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -129,7 +128,7 @@ public class IfStmt extends Statement {
     }
 
     @Override
-    public Collection<Action> computeITSActions(ProgramState current, ProgramState next) {
+    public Collection<Action> computeITSActions(ProgramState current, ProgramState next, T2Invoker invoker) {
 
         ITSFormula condition;
 

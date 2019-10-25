@@ -5,6 +5,7 @@ import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
 import de.rwth.i2.attestor.its.Action;
 import de.rwth.i2.attestor.its.AssignAction;
 import de.rwth.i2.attestor.its.ITSNondetTerm;
+import de.rwth.i2.attestor.its.T2Invoker;
 import de.rwth.i2.attestor.main.scene.SceneObject;
 import de.rwth.i2.attestor.procedures.Method;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.invoke.InvokeCleanup;
@@ -13,7 +14,6 @@ import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.ConcreteValue
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.NullPointerDereferenceException;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.SettableValue;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
-import de.rwth.i2.attestor.util.Pair;
 import de.rwth.i2.attestor.util.SingleElementUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -141,7 +141,7 @@ public class AssignInvoke extends Statement implements InvokeCleanup {
     }
 
     @Override
-    public Collection<Action> computeITSActions(ProgramState current, ProgramState next) {
+    public Collection<Action> computeITSActions(ProgramState current, ProgramState next, T2Invoker invoker) {
         System.out.println("AssignInvoke not implemented yet");
         return SingleElementUtil.createSet(new AssignAction(lhs, new ITSNondetTerm(lhs.getType())));
     }

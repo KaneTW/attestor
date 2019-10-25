@@ -5,6 +5,7 @@ import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.Statement
 import de.rwth.i2.attestor.stateSpaceGeneration.*;
 import de.rwth.i2.attestor.util.Pair;
 
+import java.io.IOException;
 import java.util.*;
 
 public class ITS {
@@ -13,13 +14,18 @@ public class ITS {
 
     private StateSpace stateSpace;
     private Program program;
+    private T2Invoker invoker;
+    private T2Result result;
+
+
 
     private Set<Transition> transitions = new LinkedHashSet<>();
 
 
-    public ITS(StateSpace stateSpace, Program program) {
+    public ITS(StateSpace stateSpace, Program program, T2Invoker invoker) {
         this.stateSpace = stateSpace;
         this.program = program;
+        this.invoker = invoker;
 
         Set<ProgramState> initial = stateSpace.getInitialStates();
 
@@ -31,8 +37,14 @@ public class ITS {
 
             // fill the rest
             fillITS(t, ps);
-        }
 
+            try {
+                result = invoker.checkTermination(this);
+            } catch (IOException ex) {
+                result = null;
+                throw new RuntimeException(ex);
+            }
+        }
     }
 
     public Set<Transition> getTransitions() {
@@ -54,7 +66,7 @@ public class ITS {
         if (cmd instanceof Statement) {
             Statement stmt = (Statement) cmd;
             for (ProgramState succ : stateSpace.getControlFlowSuccessorsOf(ps)) {
-                Collection<Action> actions = stmt.computeITSActions(ps, succ);
+                Collection<Action> actions = stmt.computeITSActions(ps, succ, invoker);
 
                 Transition candidate = new Transition(t.getTo(), getStateId(succ), actions);
 
@@ -87,4 +99,13 @@ public class ITS {
 
         return sb.toString();
     }
+
+    public T2Result getResult() {
+        return result;
+    }
+
+    public void setResult(T2Result result) {
+        this.result = result;
+    }
+
 }

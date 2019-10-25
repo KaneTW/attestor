@@ -24,6 +24,7 @@ public class CommandLineReader {
         setupInputOptions();
         setupAbstractionOptions();
         setupAnalysisOptions();
+        setupItsOptions();
         setupExportOptions();
         setupLoggerOptions();
     }
@@ -534,5 +535,18 @@ public class CommandLineReader {
         );
 
         commandLineOptions.addOptionGroup(debugOptions);
+    }
+
+    private void setupItsOptions() {
+        OptionGroup itsOptions = new OptionGroup();
+
+        itsOptions.addOption(
+                Option.builder()
+                      .longOpt("t2-path")
+                      .desc("Path to the T2 executable")
+                      .build()
+        );
+
+        commandLineOptions.addOptionGroup(itsOptions);
     }
 }

@@ -9,7 +9,6 @@ import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.*;
 import de.rwth.i2.attestor.semantics.util.DeadVariableEliminator;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.types.Types;
-import de.rwth.i2.attestor.util.Pair;
 import de.rwth.i2.attestor.util.SingleElementUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -123,7 +122,7 @@ public class AssignStmt extends Statement {
     }
 
     @Override
-    public Collection<Action> computeITSActions(ProgramState current, ProgramState next) {
+    public Collection<Action> computeITSActions(ProgramState current, ProgramState next, T2Invoker invoker) {
         ITSTerm rhsTerm = rhs.asITSTerm();
         List<Action> actions = new LinkedList<>();
 
@@ -154,16 +153,13 @@ public class AssignStmt extends Statement {
 
     private ITSTerm extractConcreteValue(ProgramState current, Value value) {
         ITSTerm rhsTerm = new ITSNondetTerm(value.getType());
-        // this doesn't actually work, yet
-        // TODO: ask why
-        /*
-        try {
 
+        try {
             GeneralConcreteValue concreteValue = (GeneralConcreteValue) value.evaluateOn(current);
             rhsTerm = new ITSLiteral(concreteValue.getNode());
         } catch (NullPointerDereferenceException ex) {
             // blank
-        }*/
+        }
         return rhsTerm;
     }
 }

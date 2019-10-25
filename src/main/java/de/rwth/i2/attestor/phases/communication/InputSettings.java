@@ -53,6 +53,8 @@ public class InputSettings implements HeapConfigurationRenaming {
     private List<String> initialHeapFiles = new ArrayList<>();
     private List<String> initialSymbolicHeapFiles = new ArrayList<>();
 
+    private String t2Path = null;
+
     public String getRootPath() {
 
         if(rootPath == "") {
@@ -246,6 +248,14 @@ public class InputSettings implements HeapConfigurationRenaming {
             result.add(getRootPath() + s);
         }
         return result;
+    }
+
+    public String getT2Path() {
+        return this.t2Path;
+    }
+
+    public void setT2Path(String path) {
+        this.t2Path = path;
     }
 
 

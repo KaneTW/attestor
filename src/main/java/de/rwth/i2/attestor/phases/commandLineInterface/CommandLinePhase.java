@@ -187,6 +187,9 @@ public class CommandLinePhase extends AbstractPhase
             case "christoph":
                 christoph();
                 break;
+            case "t2-path":
+                t2Path(option);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown command line option: " + optionName);
         }
@@ -432,6 +435,12 @@ public class CommandLinePhase extends AbstractPhase
     private void christoph() {
         logHighlight("Welcome Christoph :-)");
         Configurator.setRootLevel(Level.TRACE);
+    }
+
+    private void t2Path(Option option) {
+        String t2Path = option.getValue();
+        logger.info("t2Path: " + t2Path);
+        inputSettings.setT2Path(t2Path);
     }
 
     @Override

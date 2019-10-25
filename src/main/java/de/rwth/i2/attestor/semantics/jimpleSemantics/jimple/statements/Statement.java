@@ -2,11 +2,10 @@ package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements;
 
 
 import de.rwth.i2.attestor.its.Action;
+import de.rwth.i2.attestor.its.T2Invoker;
 import de.rwth.i2.attestor.main.scene.SceneObject;
-import de.rwth.i2.attestor.stateSpaceGeneration.Program;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.stateSpaceGeneration.SemanticsCommand;
-import de.rwth.i2.attestor.util.Pair;
 
 import java.util.*;
 
@@ -31,7 +30,7 @@ public abstract class Statement extends SceneObject implements SemanticsCommand 
      * @return A transition that can occur from executing the semantics on this state
      */
     // HACKHACK: can't re-run computeSuccessors, so gotta do this weird stuff
-    public Collection<Action> computeITSActions(ProgramState current, ProgramState next) {
+    public Collection<Action> computeITSActions(ProgramState current, ProgramState next, T2Invoker invoker) {
         return Collections.emptySet();
     }
 

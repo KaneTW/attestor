@@ -1,8 +1,12 @@
 package de.rwth.i2.attestor.phases.its;
 
 import de.rwth.i2.attestor.its.ITS;
+import de.rwth.i2.attestor.its.T2Invoker;
+import de.rwth.i2.attestor.its.T2Result;
 import de.rwth.i2.attestor.main.AbstractPhase;
 import de.rwth.i2.attestor.main.scene.Scene;
+import de.rwth.i2.attestor.phases.communication.InputSettings;
+import de.rwth.i2.attestor.phases.transformers.InputSettingsTransformer;
 import de.rwth.i2.attestor.phases.transformers.ProgramTransformer;
 import de.rwth.i2.attestor.phases.transformers.StateSpaceTransformer;
 import de.rwth.i2.attestor.stateSpaceGeneration.Program;
@@ -17,6 +21,8 @@ public class ITSPhase extends AbstractPhase {
 
     private ITS its;
 
+    private T2Result result;
+
     public ITSPhase(Scene scene) {
         super(scene);
     }
@@ -30,20 +36,25 @@ public class ITSPhase extends AbstractPhase {
     public void executePhase() throws IOException {
         this.stateSpace = getPhase(StateSpaceTransformer.class).getStateSpace();
         this.program = getPhase(ProgramTransformer.class).getProgram();
+        InputSettings inputSettings = getPhase(InputSettingsTransformer.class).getInputSettings();
 
-        this.its = new ITS(stateSpace, program);
+        String path = inputSettings.getT2Path();
 
+        if (path != null) {
+            T2Invoker invoker = new T2Invoker(inputSettings.getT2Path());
+            this.its = new ITS(stateSpace, program, invoker);
+            result = this.its.getResult();
+        } else {
+            result = null;
+        }
 
-        // hack just to test if it works
-        Writer w = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream("its.t2")));
-        w.write(its.toString());
-        w.close();
     }
 
     @Override
     public void logSummary() {
-
+        if (this.result != null) {
+            logger.info("ITS checking result: " + result.toString());
+        }
     }
 
     @Override
