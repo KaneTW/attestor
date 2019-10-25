@@ -54,6 +54,8 @@ public class ITSPhase extends AbstractPhase {
     public void logSummary() {
         if (this.result != null) {
             logger.info("ITS checking result: " + result.toString());
+        } else {
+            logger.info("Didn't run ITS");
         }
     }
 

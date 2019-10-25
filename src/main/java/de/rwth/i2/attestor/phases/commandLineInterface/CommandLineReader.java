@@ -544,6 +544,8 @@ public class CommandLineReader {
                 Option.builder()
                       .longOpt("t2-path")
                       .desc("Path to the T2 executable")
+                       .hasArg()
+                       .argName("exe-path")
                       .build()
         );
 
