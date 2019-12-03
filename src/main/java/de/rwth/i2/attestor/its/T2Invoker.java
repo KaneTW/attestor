@@ -1,8 +1,15 @@
 package de.rwth.i2.attestor.its;
 
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -36,44 +43,60 @@ public class T2Invoker {
     }
 
     public T2Result checkTermination(ITS its) throws IOException {
-        Path dir = Files.createTempDirectory("attestor_its");
-        Path file = Files.createTempFile(dir,"its", "t2");
+        Path dir = Files.createTempDirectory("attestor_its_");
+        Path file = Files.createTempFile(dir,"its_", ".t2");
+
+        String certPath = file.toString() + ".cert";
 
         Files.write(file, its.toString().getBytes());
 
-        Process t2 = invokeT2(dir, "--termination", file.toString());
+        Process t2 = invokeT2(dir, "--termination", "--export_cert=" + certPath, "--export_cert_hints", file.toString());
 
         try {
             t2.waitFor(60, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
-            return T2Result.TIMEOUT;
+            return new T2Result (T2Status.TIMEOUT, dir, null);
         }
 
         if (t2.exitValue() != 0) {
-            return T2Result.ERROR;
+            return new T2Result (T2Status.ERROR, dir, null);
         }
+
+        Document doc = null;
 
         Scanner stream = new Scanner(t2.getInputStream());
         while (stream.hasNextLine()) {
             String line = stream.nextLine();
             if (line.startsWith("Termination proof succeeded")) {
-                return T2Result.TERMINATING;
+                try {
+                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                    DocumentBuilder builder = factory.newDocumentBuilder();
+                    doc = builder.parse(certPath);
+                } catch (SAXException ex) {
+                    throw new RuntimeException(ex);
+                } catch (ParserConfigurationException ex) {
+                    throw new RuntimeException(ex);
+                }
+                return new T2Result (T2Status.TERMINATING, dir, doc);
             }
 
             if (line.startsWith("Nontermination proof succeeded")) {
-                return T2Result.NONTERMINATING;
+                return new T2Result (T2Status.NONTERMINATING, dir, doc);
             }
 
             if (line.startsWith("Termination/nontermination proof failed")) {
-                return T2Result.MAYBE;
+                return new T2Result (T2Status.MAYBE, dir, doc);
             }
         }
 
-        Files.walk(dir)
-             .sorted(Comparator.reverseOrder())
-             .map(Path::toFile)
-             .forEach(File::delete);
 
-        return T2Result.ERROR;
+
+
+//        Files.walk(dir)
+//             .sorted(Comparator.reverseOrder())
+//             .map(Path::toFile)
+//             .forEach(File::delete);
+
+        return new T2Result(T2Status.ERROR, dir, null);
     }
 }
