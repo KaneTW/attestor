@@ -18,7 +18,7 @@ public class RankingFunction {
         }
 
         Location location = Location.readLocation((Element) element.getElementsByTagName("location").item(0));
-        Expression expression = Expression.readExpression((Element) element.getElementsByTagName("expression").item(0));
+        Expression expression = Expression.readTopLevelExpression((Element) element.getElementsByTagName("expression").item(0));
 
         return new RankingFunction(location, expression);
     }

@@ -10,7 +10,7 @@ public interface Expression {
             throw new IllegalArgumentException("Invalid tag name");
         }
 
-        Element child = (Element) element.getFirstChild();
+        Element child = XMLUtils.getElementChild(element);
         return readExpression(child);
     }
     static Expression readExpression(Element child) {
@@ -20,8 +20,8 @@ public interface Expression {
             return ProductExpr.readProductExpr(child);
         } else if (child.getTagName() == "constant") {
             return ConstExpr.readConstExpr(child);
-        } else if (child.getTagName() == "variable") {
-            throw new UnsupportedOperationException("Variable expressions not supported yet (since unused in T2)");
+        } else if (child.getTagName() == "variableId") {
+            return VarExpr.readVarExpr(child);
         } else {
             throw new IllegalArgumentException("Unknown tag name " + child.getTagName());
         }

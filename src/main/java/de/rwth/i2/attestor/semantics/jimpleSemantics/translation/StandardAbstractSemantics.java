@@ -177,6 +177,10 @@ public class StandardAbstractSemantics extends SceneObject implements JimpleToAb
         if (input instanceof soot.jimple.RemExpr) {
             return translateRemExpr(input);
         }
+
+        if (input instanceof soot.jimple.LengthExpr) {
+            return translateLengthExpr(input);
+        }
         logger.trace("StandardSemantic not applicable. Using next level..");
         return nextLevel.translateValue(input);
     }
@@ -372,6 +376,14 @@ public class StandardAbstractSemantics extends SceneObject implements JimpleToAb
         soot.jimple.NewExpr expr = (soot.jimple.NewExpr) input;
         Type type = topLevel.translateType(expr.getType());
         return new NewExpr(type);
+    }
+
+    // we represent array.length expressions as the array itself
+    private LengthExpr translateLengthExpr(soot.Value input) {
+
+        soot.jimple.LengthExpr expr = (soot.jimple.LengthExpr) input;
+        Type type = topLevel.translateType(expr.getType());
+        return new LengthExpr(type, topLevel.translateValue(expr.getOp()));
     }
 
     /**

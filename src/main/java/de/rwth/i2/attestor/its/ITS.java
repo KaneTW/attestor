@@ -65,7 +65,11 @@ public class ITS {
         SemanticsCommand cmd = program.getStatement(ps.getProgramCounter());
         if (cmd instanceof Statement) {
             Statement stmt = (Statement) cmd;
-            for (ProgramState succ : stateSpace.getControlFlowSuccessorsOf(ps)) {
+            HashSet<ProgramState> succs = new HashSet<>(stateSpace.getControlFlowSuccessorsOf(ps));
+
+            succs.addAll(stateSpace.getMaterializationSuccessorsOf(ps));
+
+            for (ProgramState succ : succs) {
                 Collection<Action> actions = stmt.computeITSActions(ps, succ, invoker);
 
                 Transition candidate = new Transition(t.getTo(), getStateId(succ), actions);

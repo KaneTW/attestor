@@ -131,21 +131,28 @@ public class AssignStmt extends Statement {
             rhsTerm = extractConcreteValue(next, lhs);
             actions.add(new AssignAction(lhs, rhsTerm));
             actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.Greater)));
-        } else {
+        } else  {
             actions.add(new AssignAction(lhs, rhsTerm));
+        }
+
+        if (rhs instanceof LengthExpr) {
+            // array lengths are >= 0
+            actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.GreaterEqual)));
         }
 
         // nb: NewExpr only occurs in top level expressions
         for (SelectorLabel label: lhs.getType().getSelectorLabels().keySet()) {
             Field fld = new Field(Types.UNDEFINED, lhs, label);
             ITSVariable var = new ITSVariable(fld);
+            ITSTerm term;
 
             try {
-                actions.add(new AssignAction(var, extractConcreteValue(next, fld)));
+                term =  extractConcreteValue(next, fld);
             } catch (IllegalStateException ex) {
-                // if we don't have the field yet, ignore
-                continue;
+                // set field to 0 if we don't have it (assuming uninitialized memory)
+                term = new ITSLiteral(0);
             }
+            actions.add(new AssignAction(var, term));
         }
 
         return actions;
@@ -156,7 +163,17 @@ public class AssignStmt extends Statement {
 
         try {
             GeneralConcreteValue concreteValue = (GeneralConcreteValue) value.evaluateOn(next);
-            rhsTerm = new ITSLiteral(concreteValue.getNode());
+            // uninitialized memory, NULL and int 0 all map to 0
+            if (concreteValue.isUndefined() || concreteValue.type().equals(Types.NULL) || concreteValue.type().equals(Types.INT_0)) {
+                rhsTerm = new ITSLiteral(0);
+            } else if (concreteValue.type().equals(Types.INT_PLUS_1)) {
+                rhsTerm = new ITSLiteral(1);
+            } else if (concreteValue.type().equals(Types.INT_MINUS_1)) {
+                rhsTerm = new ITSLiteral(-1);
+            } else {
+                rhsTerm = new ITSLiteral(concreteValue.getNode());
+            }
+
         } catch (NullPointerDereferenceException ex) {
             // blank
         }
