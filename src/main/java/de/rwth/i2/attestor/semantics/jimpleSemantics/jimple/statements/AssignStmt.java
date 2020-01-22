@@ -122,13 +122,13 @@ public class AssignStmt extends Statement {
     }
 
     @Override
-    public Collection<Action> computeITSActions(ProgramState current, ProgramState next, T2Invoker invoker) {
+    public Collection<Action> computeITSActions(ProgramState previous, ProgramState next, T2Invoker invoker) {
         ITSTerm rhsTerm = rhs.asITSTerm();
         List<Action> actions = new LinkedList<>();
 
         // we fetch the node identifier from the heap configuration for this, if we can
         if (rhs instanceof NewExpr) {
-            rhsTerm = extractConcreteValue(current, lhs);
+            rhsTerm = extractConcreteValue(next, lhs);
             actions.add(new AssignAction(lhs, rhsTerm));
             actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.Greater)));
         } else {
@@ -141,7 +141,7 @@ public class AssignStmt extends Statement {
             ITSVariable var = new ITSVariable(fld);
 
             try {
-                actions.add(new AssignAction(var, extractConcreteValue(current, fld)));
+                actions.add(new AssignAction(var, extractConcreteValue(next, fld)));
             } catch (IllegalStateException ex) {
                 // if we don't have the field yet, ignore
                 continue;
@@ -151,11 +151,11 @@ public class AssignStmt extends Statement {
         return actions;
     }
 
-    private ITSTerm extractConcreteValue(ProgramState current, Value value) {
+    private ITSTerm extractConcreteValue(ProgramState next, Value value) {
         ITSTerm rhsTerm = new ITSNondetTerm(value.getType());
 
         try {
-            GeneralConcreteValue concreteValue = (GeneralConcreteValue) value.evaluateOn(current);
+            GeneralConcreteValue concreteValue = (GeneralConcreteValue) value.evaluateOn(next);
             rhsTerm = new ITSLiteral(concreteValue.getNode());
         } catch (NullPointerDereferenceException ex) {
             // blank
