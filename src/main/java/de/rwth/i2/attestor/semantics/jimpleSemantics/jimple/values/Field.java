@@ -128,4 +128,12 @@ public class Field implements SettableValue {
     public ITSTerm asITSTerm() {
         return new ITSVariable(this);
     }
+
+    public Value getOriginValue() {
+        return originValue;
+    }
+
+    public SelectorLabel getSelectorLabel() {
+        return selectorLabel;
+    }
 }

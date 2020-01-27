@@ -126,34 +126,39 @@ public class AssignStmt extends Statement {
         ITSTerm rhsTerm = rhs.asITSTerm();
         List<Action> actions = new LinkedList<>();
 
-        // we fetch the node identifier from the heap configuration for this, if we can
-        if (rhs instanceof NewExpr) {
-            rhsTerm = extractConcreteValue(next, lhs);
-            actions.add(new AssignAction(lhs, rhsTerm));
-            actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.Greater)));
-        } else  {
-            actions.add(new AssignAction(lhs, rhsTerm));
+        // if we live on the heap, get the concrete value
+        if (rhs.needsMaterialization(next)) {
+            rhsTerm = extractConcreteValue( next, lhs);
         }
 
-        if (rhs instanceof LengthExpr) {
+        actions.add(new AssignAction(lhs, rhsTerm));
+        // we fetch the node identifier from the heap configuration for this, if we can
+        if (rhs instanceof NewExpr) {
+            actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.Greater)));
+        } else if (rhs instanceof LengthExpr) {
             // array lengths are >= 0
             actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.GreaterEqual)));
         }
 
         // nb: NewExpr only occurs in top level expressions
-        for (SelectorLabel label: lhs.getType().getSelectorLabels().keySet()) {
-            Field fld = new Field(Types.UNDEFINED, lhs, label);
-            ITSVariable var = new ITSVariable(fld);
-            ITSTerm term;
+        if (!(lhs instanceof Field)) {
+            // we don't care about fields of fields; those can never occur in Jimple anyways
+            for (SelectorLabel label : rhs.getType().getSelectorLabels().keySet()) {
+                Field rhsFld = new Field(Types.UNDEFINED, rhs, label);
+                Field lhsFld = new Field(Types.UNDEFINED, lhs, label);
+                ITSVariable var = new ITSVariable(lhsFld);
+                ITSTerm term;
 
-            try {
-                term =  extractConcreteValue(next, fld);
-            } catch (IllegalStateException ex) {
-                // set field to 0 if we don't have it (assuming uninitialized memory)
-                term = new ITSLiteral(0);
+                try {
+                    term = extractConcreteValue( next, lhsFld);
+                } catch (IllegalStateException ex) {
+                    // if attestor doesn't know about a field, it can be anything
+                    term = new ITSNondetTerm(lhsFld.getType());
+                }
+                actions.add(new AssignAction(var, term));
             }
-            actions.add(new AssignAction(var, term));
         }
+
 
         return actions;
     }
@@ -163,14 +168,14 @@ public class AssignStmt extends Statement {
 
         try {
             GeneralConcreteValue concreteValue = (GeneralConcreteValue) value.evaluateOn(next);
-            // uninitialized memory, NULL and int 0 all map to 0
-            if (concreteValue.isUndefined() || concreteValue.type().equals(Types.NULL) || concreteValue.type().equals(Types.INT_0)) {
+            // NULL and int 0 all map to 0
+            if (concreteValue.type().equals(Types.NULL) || concreteValue.type().equals(Types.INT_0)) {
                 rhsTerm = new ITSLiteral(0);
             } else if (concreteValue.type().equals(Types.INT_PLUS_1)) {
                 rhsTerm = new ITSLiteral(1);
             } else if (concreteValue.type().equals(Types.INT_MINUS_1)) {
                 rhsTerm = new ITSLiteral(-1);
-            } else {
+            } else if (!concreteValue.isUndefined()) {
                 rhsTerm = new ITSLiteral(concreteValue.getNode());
             }
 

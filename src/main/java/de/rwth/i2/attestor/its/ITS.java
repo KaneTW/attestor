@@ -67,7 +67,7 @@ public class ITS {
             Statement stmt = (Statement) cmd;
             HashSet<ProgramState> succs = new HashSet<>(stateSpace.getControlFlowSuccessorsOf(ps));
 
-            succs.addAll(stateSpace.getMaterializationSuccessorsOf(ps));
+//            succs.addAll(stateSpace.getMaterializationSuccessorsOf(ps));
 
             for (ProgramState succ : succs) {
                 Collection<Action> actions = stmt.computeITSActions(ps, succ, invoker);
