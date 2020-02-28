@@ -1,11 +1,23 @@
 package de.rwth.i2.attestor.its.certificate;
 
+import org.eclipse.persistence.oxm.annotations.XmlValueExtension;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class ConstExpr implements Expression {
+import javax.xml.bind.annotation.*;
+
+@XmlRootElement(name = "constant")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class ConstExpr extends Expression {
+
+    @XmlValueExtension
+    @XmlValue
     private final int constant;
+
+    private ConstExpr() {
+        this.constant = -1;
+    }
 
     public ConstExpr(int constant) {
         this.constant = constant;
@@ -16,13 +28,4 @@ public class ConstExpr implements Expression {
         return String.valueOf(constant);
     }
 
-
-    public static ConstExpr readConstExpr(Element element) {
-        if (element.getTagName() != "constant") {
-            throw new IllegalArgumentException("Invalid tag name");
-        }
-
-        String constStr = element.getTextContent();
-        return new ConstExpr(Integer.parseInt(constStr));
-    }
 }

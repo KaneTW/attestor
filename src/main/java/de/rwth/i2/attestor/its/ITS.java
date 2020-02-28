@@ -1,9 +1,12 @@
 package de.rwth.i2.attestor.its;
 
+import de.rwth.i2.attestor.its.certificate.ConstExpr;
+import de.rwth.i2.attestor.its.certificate.Expression;
+import de.rwth.i2.attestor.its.certificate.ProductExpr;
+import de.rwth.i2.attestor.its.certificate.SumExpr;
 import de.rwth.i2.attestor.semantics.TerminalStatement;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.Statement;
 import de.rwth.i2.attestor.stateSpaceGeneration.*;
-import de.rwth.i2.attestor.util.Pair;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,7 +22,7 @@ public class ITS {
 
 
 
-    private Set<Transition> transitions = new LinkedHashSet<>();
+    private Set<ITSTransition> transitions = new LinkedHashSet<>();
 
 
     public ITS(StateSpace stateSpace, Program program, T2Invoker invoker) {
@@ -30,7 +33,7 @@ public class ITS {
         Set<ProgramState> initial = stateSpace.getInitialStates();
 
         for(ProgramState ps : initial) {
-            Transition t = new Transition(INITIAL_STATE, getStateId(ps), Collections.emptySet());
+            ITSTransition t = new ITSTransition(INITIAL_STATE, getStateId(ps), Collections.emptySet());
 
             // add an initial state
             transitions.add(t);
@@ -47,7 +50,7 @@ public class ITS {
         }
     }
 
-    public Set<Transition> getTransitions() {
+    public Set<ITSTransition> getTransitions() {
         return transitions;
     }
 
@@ -61,7 +64,7 @@ public class ITS {
         return id + 1;
     }
 
-    private void fillITS(Transition t, ProgramState ps) {
+    private void fillITS(ITSTransition t, ProgramState ps) {
         SemanticsCommand cmd = program.getStatement(ps.getProgramCounter());
         if (cmd instanceof Statement) {
             Statement stmt = (Statement) cmd;
@@ -72,7 +75,7 @@ public class ITS {
             for (ProgramState succ : succs) {
                 Collection<Action> actions = stmt.computeITSActions(ps, succ, invoker);
 
-                Transition candidate = new Transition(t.getTo(), getStateId(succ), actions);
+                ITSTransition candidate = new ITSTransition(t.getTo(), getStateId(succ), actions);
 
                 if (transitions.contains(candidate)) {
                     // avoid cyclic loops
@@ -97,7 +100,7 @@ public class ITS {
 
         sb.append(String.format("START: %d;\n\n", INITIAL_STATE));
 
-        for (Transition t : transitions) {
+        for (ITSTransition t : transitions) {
             sb.append(t).append("\n\n");
         }
 
@@ -110,6 +113,34 @@ public class ITS {
 
     public void setResult(T2Result result) {
         this.result = result;
+    }
+
+
+    private boolean isConstant(Expression expr) {
+        if (expr instanceof ConstExpr) {
+            return true;
+        }
+
+        boolean isConst = true;
+        if (expr instanceof SumExpr) {
+            SumExpr sum = (SumExpr) expr;
+            for (Expression op :  sum.getOperands()) {
+                if (!(op instanceof ConstExpr)) {
+                    isConst = false;
+                }
+            }
+        }
+
+        if (expr instanceof ProductExpr) {
+            ProductExpr product = (ProductExpr) expr;
+            for (Expression op : product.getOperands()) {
+                if (!(op instanceof ConstExpr)) {
+                    isConst = false;
+                }
+            }
+        }
+
+        return isConst;
     }
 
 }

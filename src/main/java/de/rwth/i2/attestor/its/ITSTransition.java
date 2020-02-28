@@ -4,7 +4,7 @@ package de.rwth.i2.attestor.its;
 import java.util.Collection;
 import java.util.Objects;
 
-public class Transition {
+public class ITSTransition {
 
     private final int from;
     private final int to;
@@ -22,7 +22,7 @@ public class Transition {
         return actions;
     }
 
-    public Transition(int from, int to, Collection<Action> actions) {
+    public ITSTransition(int from, int to, Collection<Action> actions) {
         this.from = from;
         this.to = to;
         this.actions = actions;
@@ -30,8 +30,8 @@ public class Transition {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof Transition) {
-            Transition t = (Transition) o;
+        if (o instanceof ITSTransition) {
+            ITSTransition t = (ITSTransition) o;
             return t.from == from && t.to == to && actions.equals(t.actions);
         }
 

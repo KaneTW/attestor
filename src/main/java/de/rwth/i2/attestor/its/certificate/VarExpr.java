@@ -1,25 +1,26 @@
 package de.rwth.i2.attestor.its.certificate;
 
+import org.eclipse.persistence.oxm.annotations.XmlValueExtension;
 import org.w3c.dom.Element;
 
-public class VarExpr implements Expression {
-    private final String variable;
+import javax.xml.bind.annotation.*;
+
+@XmlRootElement(name = "variableId")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class VarExpr extends Expression {
+    @XmlValueExtension
+    private final String variableId;
+
+    private VarExpr() {
+        variableId = null;
+    }
 
     public VarExpr(String variable) {
-        this.variable = variable;
+        this.variableId = variable;
     }
 
     @Override
     public String toString() {
-        return variable;
-    }
-
-    public static VarExpr readVarExpr(Element element) {
-        if (element.getTagName() != "variableId") {
-            throw new IllegalArgumentException("Invalid tag name");
-        }
-
-        return new VarExpr(element.getTextContent());
-
+        return variableId;
     }
 }
