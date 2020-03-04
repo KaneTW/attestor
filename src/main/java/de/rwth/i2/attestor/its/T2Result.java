@@ -1,9 +1,6 @@
 package de.rwth.i2.attestor.its;
 
-import de.rwth.i2.attestor.its.certificate.Expression;
-import de.rwth.i2.attestor.its.certificate.RankingFunction;
-import de.rwth.i2.attestor.its.certificate.Transition;
-import de.rwth.i2.attestor.its.certificate.TransitionRemovalProof;
+import de.rwth.i2.attestor.its.certificate.*;
 import org.eclipse.persistence.jaxb.JAXBContextFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,7 +29,7 @@ public class T2Result {
         this.certificate = certificate;
 
         try {
-            this.context = JAXBContextFactory.createContext(new Class[] { TransitionRemovalProof.class }, null);
+            this.context = JAXBContextFactory.createContext(new Class[] { TransitionRemovalProof.class, LTS.class, CooperationTermination.class  }, null);
             this.unmarshaller = this.context.createUnmarshaller();
             //this.unmarshaller.setEventHandler(new DefaultValidationEventHandler());
         } catch (JAXBException ex) {
@@ -52,6 +49,18 @@ public class T2Result {
         return certificate;
     }
 
+    public LTS getLts() {
+        // there should be exactly one lts
+        Node node = getCertificate().getElementsByTagName("lts").item(0);
+        try {
+            return (LTS) unmarshaller.unmarshal(node);
+        } catch (JAXBException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+
     public List<TransitionRemovalProof> getProofs() {
         ArrayList<TransitionRemovalProof> proofs = new ArrayList<>();
         NodeList elements = getCertificate().getElementsByTagName("transitionRemoval");
@@ -64,5 +73,15 @@ public class T2Result {
             }
         }
         return proofs;
+    }
+
+    public CooperationTermination getCooperationTermination() {
+        Node proof = getCertificate().getElementsByTagName("switchToCooperationTermination").item(0);
+        try {
+            return (CooperationTermination) unmarshaller.unmarshal(proof);
+        } catch (JAXBException ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 }

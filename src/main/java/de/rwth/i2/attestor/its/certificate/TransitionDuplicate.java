@@ -30,7 +30,6 @@ public class TransitionDuplicate extends Transition {
         return "sharp transition: " + transition;
     }
 
-
     private TransitionDuplicate() {
         this.transition = -1;
     }

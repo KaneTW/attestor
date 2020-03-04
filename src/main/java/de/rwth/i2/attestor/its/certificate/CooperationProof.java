@@ -4,7 +4,8 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 
 @XmlSeeAlso({
         TransitionRemovalProof.class,
-        SccDecompositionProof.class
+        SccDecompositionProof.class,
+        LocationAdditionProof.class
 })
 public abstract class CooperationProof {
 }

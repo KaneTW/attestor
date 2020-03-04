@@ -4,6 +4,7 @@ import de.rwth.i2.attestor.its.ITS;
 import de.rwth.i2.attestor.its.T2Invoker;
 import de.rwth.i2.attestor.its.T2Result;
 import de.rwth.i2.attestor.its.T2Status;
+import de.rwth.i2.attestor.its.certificate.LTS;
 import de.rwth.i2.attestor.main.AbstractPhase;
 import de.rwth.i2.attestor.main.scene.Scene;
 import de.rwth.i2.attestor.phases.communication.InputSettings;
@@ -57,6 +58,7 @@ public class ITSPhase extends AbstractPhase {
             logger.info("ITS checking result: " + result.getStatus() + " at " + result.getOutputDirectory());
             if (result.getStatus() == T2Status.TERMINATING) {
                 result.getProofs();
+                LTS lts = result.getLts();
             }
         } else {
             logger.info("Didn't run ITS");

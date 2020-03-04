@@ -27,7 +27,6 @@ public class TransitionId  extends Transition {
         return "flat transition: " + transition;
     }
 
-
     private TransitionId() {
         this.transition = -1;
     }
