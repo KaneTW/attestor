@@ -1,5 +1,7 @@
 package de.rwth.i2.attestor.its;
 
+import java.util.Objects;
+
 public class AssumeAction implements Action {
     private final ITSFormula expr;
 
@@ -14,5 +16,18 @@ public class AssumeAction implements Action {
     @Override
     public String toString() {
         return String.format("assume(%s);", expr);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AssumeAction that = (AssumeAction) o;
+        return expr.equals(that.expr);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(expr);
     }
 }

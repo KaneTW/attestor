@@ -2,6 +2,8 @@ package de.rwth.i2.attestor.its;
 
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.SettableValue;
 
+import java.util.Objects;
+
 public class AssignAction implements Action {
     private final ITSVariable lhs;
     private final ITSTerm rhs;
@@ -27,5 +29,19 @@ public class AssignAction implements Action {
     @Override
     public String toString() {
         return String.format("%s := %s;", lhs, rhs);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AssignAction that = (AssignAction) o;
+        return lhs.equals(that.lhs) &&
+                rhs.equals(that.rhs);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(lhs, rhs);
     }
 }

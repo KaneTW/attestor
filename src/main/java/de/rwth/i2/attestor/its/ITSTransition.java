@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.its;
 
 
+import com.google.common.collect.HashMultiset;
+
 import java.util.Collection;
 import java.util.Objects;
 
@@ -32,7 +34,7 @@ public class ITSTransition {
     public boolean equals(Object o) {
         if (o instanceof ITSTransition) {
             ITSTransition t = (ITSTransition) o;
-            return t.from == from && t.to == to && actions.equals(t.actions);
+            return t.from == from && t.to == to && HashMultiset.create(actions).equals(HashMultiset.create(t.actions));
         }
 
         return false;
