@@ -79,7 +79,7 @@ public class CertificateMapping {
                 throw new RuntimeException("A location was added that's not a dummy or snapshot: " + td);
             }
 
-            int state = from == null ? from : to;
+            int state = from != null ? from : to;
 
             transitionSnapshotMap.put(id, state);
         }

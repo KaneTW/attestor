@@ -61,13 +61,27 @@ public class T2Result {
     }
 
 
-    public List<TransitionRemovalProof> getProofs() {
+    public List<TransitionRemovalProof> getTransitionRemovalProofs() {
         ArrayList<TransitionRemovalProof> proofs = new ArrayList<>();
         NodeList elements = getCertificate().getElementsByTagName("transitionRemoval");
         for (int i = 0; i < elements.getLength(); i++) {
             Node node = elements.item(i);
             try {
                 proofs.add((TransitionRemovalProof)unmarshaller.unmarshal(node));
+            } catch (JAXBException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return proofs;
+    }
+
+    public List<LocationAdditionProof> getLocationAdditionProofs() {
+        ArrayList<LocationAdditionProof> proofs = new ArrayList<>();
+        NodeList elements = getCertificate().getElementsByTagName("locationAddition");
+        for (int i = 0; i < elements.getLength(); i++) {
+            Node node = elements.item(i);
+            try {
+                proofs.add((LocationAdditionProof)unmarshaller.unmarshal(node));
             } catch (JAXBException ex) {
                 ex.printStackTrace();
             }

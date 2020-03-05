@@ -8,6 +8,8 @@ import javax.xml.bind.annotation.*;
 @XmlRootElement(name = "variableId")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class VarExpr extends Expression {
+
+    @XmlValue
     @XmlValueExtension
     private final String variableId;
 

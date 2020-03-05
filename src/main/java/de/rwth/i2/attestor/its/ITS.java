@@ -116,31 +116,6 @@ public class ITS {
     }
 
 
-    private boolean isConstant(Expression expr) {
-        if (expr instanceof ConstExpr) {
-            return true;
-        }
 
-        boolean isConst = true;
-        if (expr instanceof SumExpr) {
-            SumExpr sum = (SumExpr) expr;
-            for (Expression op :  sum.getOperands()) {
-                if (!(op instanceof ConstExpr)) {
-                    isConst = false;
-                }
-            }
-        }
-
-        if (expr instanceof ProductExpr) {
-            ProductExpr product = (ProductExpr) expr;
-            for (Expression op : product.getOperands()) {
-                if (!(op instanceof ConstExpr)) {
-                    isConst = false;
-                }
-            }
-        }
-
-        return isConst;
-    }
 
 }
