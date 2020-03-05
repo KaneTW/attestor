@@ -63,6 +63,9 @@ public class ITSPhase extends AbstractPhase {
 
                 for (TransitionRemovalProof proof : removalProofs) {
                     for (Transition tr : proof.getRemove()) {
+                        // don't care about flat transitions for now
+                        if (!tr.isDuplicate()) continue;
+
                         ITSTransition itsTr = mapping.getTransitionMap().get(tr.getTransition());
                         if (itsTr == null) {
                             int originState = mapping.getTransitionSnapshotMap().get(tr.getTransition());
@@ -77,7 +80,7 @@ public class ITSPhase extends AbstractPhase {
                             RankingFunction rfSource =  proof.getRankingFunctions().stream().filter(rankingFunction -> rankingFunction.getLocation().isDuplicate() && rankingFunction.getLocation().getLocation().equals(Integer.toString(source))).findAny().get();
                             RankingFunction rfTarget =  proof.getRankingFunctions().stream().filter(rankingFunction -> rankingFunction.getLocation().isDuplicate() && rankingFunction.getLocation().getLocation().equals(Integer.toString(target))).findAny().get();
 
-                            logger.info("Program is terminating because, in the transition from " + source + " to " + target + ", " +  rfSource + " is strictly smaller than " + rfTarget);
+                            logger.info("Program is terminating because, in the transition from " + source + " to " + target + ", " +  rfSource + " is strictly greater than " + rfTarget);
                         }
                     }
                 }
