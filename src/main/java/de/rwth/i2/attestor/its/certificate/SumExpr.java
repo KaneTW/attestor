@@ -2,7 +2,9 @@ package de.rwth.i2.attestor.its.certificate;
 
 
 import javax.xml.bind.annotation.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @XmlRootElement(name = "sum")
@@ -27,5 +29,10 @@ public class SumExpr extends Expression {
 
     public List<Expression> getOperands() {
         return operands;
+    }
+
+    @Override
+    public Set<String> getOccurringVariables() {
+        return operands.stream().flatMap(expression -> expression.getOccurringVariables().stream()).collect(Collectors.toSet());
     }
 }

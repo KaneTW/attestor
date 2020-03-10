@@ -7,6 +7,7 @@ import org.w3c.dom.NodeList;
 import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @XmlRootElement(name = "product")
@@ -31,6 +32,11 @@ public class ProductExpr extends Expression {
 
     public List<Expression> getOperands() {
         return operands;
+    }
+
+    @Override
+    public Set<String> getOccurringVariables() {
+        return operands.stream().flatMap(expression -> expression.getOccurringVariables().stream()).collect(Collectors.toSet());
     }
 }
 

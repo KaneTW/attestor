@@ -5,6 +5,7 @@ import org.w3c.dom.Node;
 
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
+import java.util.Set;
 
 
 @XmlSeeAlso({
@@ -41,5 +42,7 @@ public abstract class Expression {
 
         return isConst;
     }
+
+    public abstract Set<String> getOccurringVariables();
 
 }

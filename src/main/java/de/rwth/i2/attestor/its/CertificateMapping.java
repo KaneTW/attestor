@@ -1,9 +1,6 @@
 package de.rwth.i2.attestor.its;
 
-import de.rwth.i2.attestor.its.certificate.LTS;
-import de.rwth.i2.attestor.its.certificate.LocationAdditionProof;
-import de.rwth.i2.attestor.its.certificate.TransitionDefinition;
-import de.rwth.i2.attestor.its.certificate.TransitionRemovalProof;
+import de.rwth.i2.attestor.its.certificate.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -92,4 +89,5 @@ public class CertificateMapping {
     public Map<Integer, Integer> getTransitionSnapshotMap() {
         return transitionSnapshotMap;
     }
+
 }

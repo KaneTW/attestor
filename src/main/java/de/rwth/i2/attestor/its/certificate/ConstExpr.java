@@ -6,6 +6,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.bind.annotation.*;
+import java.util.Collections;
+import java.util.Set;
 
 @XmlRootElement(name = "constant")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -28,4 +30,9 @@ public class ConstExpr extends Expression {
         return String.valueOf(constant);
     }
 
+
+    @Override
+    public Set<String> getOccurringVariables() {
+        return Collections.emptySet();
+    }
 }

@@ -1,5 +1,8 @@
 package de.rwth.i2.attestor.its.certificate;
 
+import com.google.common.graph.MutableNetwork;
+import com.google.common.graph.NetworkBuilder;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -31,5 +34,20 @@ public class LTS {
 
     public List<TransitionDefinition> getTransitions() {
         return transitions;
+    }
+
+    public MutableNetwork<String, Integer> asMutableNetwork() {
+        MutableNetwork<String, Integer> graph = NetworkBuilder
+                .directed()
+                .allowsParallelEdges(true)
+                .allowsSelfLoops(true)
+                .build();
+        for (TransitionDefinition td : transitions) {
+            graph.addEdge( td.getSource().getLocation()
+                    , td.getTarget().getLocation()
+                    , td.getTransition().getTransition() );
+        }
+
+        return graph;
     }
 }

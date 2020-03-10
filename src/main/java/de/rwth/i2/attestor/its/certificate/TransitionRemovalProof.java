@@ -1,5 +1,9 @@
 package de.rwth.i2.attestor.its.certificate;
 
+import com.google.common.graph.Graphs;
+import com.google.common.graph.MutableNetwork;
+import com.google.common.graph.Network;
+import com.google.common.graph.NetworkBuilder;
 import org.eclipse.persistence.oxm.annotations.XmlPath;
 
 import javax.xml.bind.annotation.*;
@@ -7,7 +11,7 @@ import java.util.List;
 
 @XmlRootElement(name="transitionRemoval")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class TransitionRemovalProof extends CooperationProof {
+public class TransitionRemovalProof extends CooperationProof implements HasGraph {
     @XmlElementWrapper(required = true)
     @XmlElementRef
     private final List<RankingFunction> rankingFunctions;
@@ -55,5 +59,14 @@ public class TransitionRemovalProof extends CooperationProof {
 
     public CooperationProof getNextProof() {
         return nextProof;
+    }
+
+    @Override
+    public Network<String, Integer> getCurrentGraph(Network<String, Integer> previous) {
+        MutableNetwork<String, Integer> graph = Graphs.copyOf(previous);
+
+        remove.stream().forEach(transition -> graph.removeEdge(transition.getTransition()));
+
+        return graph;
     }
 }

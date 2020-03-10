@@ -1,13 +1,17 @@
 package de.rwth.i2.attestor.its.certificate;
 
+import com.google.common.graph.Graphs;
+import com.google.common.graph.Network;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @XmlRootElement(name="sccWithProof")
-public class SccWithProof {
+public class SccWithProof implements HasGraph {
 
     @XmlElementWrapper(name="scc")
     @XmlElementRef
@@ -27,5 +31,10 @@ public class SccWithProof {
 
     public CooperationProof getNextProof() {
         return nextProof;
+    }
+
+    @Override
+    public Network<String, Integer> getCurrentGraph(Network<String, Integer> previous) {
+        return Graphs.inducedSubgraph(previous, sccs.stream().map(Location::getLocation).collect(Collectors.toList()));
     }
 }
