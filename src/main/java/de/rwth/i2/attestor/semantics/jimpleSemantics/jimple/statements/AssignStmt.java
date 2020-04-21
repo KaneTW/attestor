@@ -3,6 +3,7 @@ package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements;
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
 import de.rwth.i2.attestor.graph.SelectorLabel;
+import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.its.*;
 import de.rwth.i2.attestor.main.scene.SceneObject;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.*;
@@ -10,6 +11,8 @@ import de.rwth.i2.attestor.semantics.util.DeadVariableEliminator;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.types.Types;
 import de.rwth.i2.attestor.util.SingleElementUtil;
+import fj.test.Gen;
+import gnu.trove.list.array.TIntArrayList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -121,18 +124,21 @@ public class AssignStmt extends Statement {
         return false;
     }
 
+    private int getNodeFromConcreteValue(ConcreteValue value) {
+        if (value instanceof GeneralConcreteValue) {
+            GeneralConcreteValue gv = (GeneralConcreteValue) value;
+            return gv.getNode();
+        }
+        return HeapConfiguration.INVALID_ELEMENT;
+    }
+
+
     @Override
     public Collection<Action> computeITSActions(ProgramState previous, ProgramState next, T2Invoker invoker) {
         ITSTerm rhsTerm = rhs.asITSTerm();
         List<Action> actions = new LinkedList<>();
 
-        // if we live on the heap, get the concrete value
-        if (rhs.needsMaterialization(next)) {
-            rhsTerm = extractConcreteValue( next, lhs);
-        }
 
-        actions.add(new AssignAction(lhs, rhsTerm));
-        // we fetch the node identifier from the heap configuration for this, if we can
         if (rhs instanceof NewExpr) {
             actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.Greater)));
         } else if (rhs instanceof LengthExpr) {
@@ -140,30 +146,53 @@ public class AssignStmt extends Statement {
             actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.GreaterEqual)));
         }
 
-        // nb: NewExpr only occurs in top level expressions
-        if (!(lhs instanceof Field)) {
-            // we don't care about fields of fields; those can never occur in Jimple anyways
-            for (SelectorLabel label : rhs.getType().getSelectorLabels().keySet()) {
-                Field rhsFld = new Field(Types.UNDEFINED, rhs, label);
-                Field lhsFld = new Field(Types.UNDEFINED, lhs, label);
-                ITSVariable var = new ITSVariable(lhsFld);
-                ITSTerm term;
 
-                try {
-                    term = extractConcreteValue( next, lhsFld);
-                } catch (IllegalStateException ex) {
-                    // if attestor doesn't know about a field, it can be anything
-                    term = new ITSNondetTerm(lhsFld.getType());
-                }
-                actions.add(new AssignAction(var, term));
+        // Handle putfield
+        if (lhs instanceof Field) {
+            HeapConfiguration heap = next.getHeap();
+            Field lhsField = (Field) lhs;
+            Local lhsOriginLocal = (Local) lhsField.getOriginValue();
+
+            // we'll constraint this using assumptions, so assume nondet for now
+            actions.add(new AssignAction(lhsOriginLocal, new ITSNondetTerm(lhsOriginLocal.getType())));
+
+            int originNode = getNodeFromConcreteValue(lhsOriginLocal.evaluateOn(next));
+
+            if (originNode == HeapConfiguration.INVALID_ELEMENT) {
+                return actions;
             }
-        }
 
+
+            ITSObjectVariable originVar = new ITSObjectVariable(originNode);
+            ITSTerm oldFieldVar = extractConcreteValue(previous, lhs, true);
+            ITSTerm newFieldVar = extractConcreteValue(next, rhs, true);
+
+            // find all predecessors
+            TIntArrayList preds = heap.predecessorNodesOf(originNode);
+
+            for (int i = 0; i < preds.size(); i++) {
+                int pred = preds.get(i);
+
+                ITSObjectVariable predVar = new ITSObjectVariable(pred);
+                if (!(newFieldVar instanceof ITSNondetTerm)) {
+                    actions.add(new AssumeAction(new ITSCompareFormula(new ITSBinaryTerm(originVar, newFieldVar, IntOp.PLUS), predVar, CompOp.GreaterEqual)));
+                }
+                if (!(oldFieldVar instanceof ITSNondetTerm)) {
+                    actions.add(new AssumeAction(new ITSCompareFormula(predVar, new ITSBinaryTerm(originVar, oldFieldVar, IntOp.MINUS), CompOp.GreaterEqual)));
+                }
+            }
+        } else {
+            actions.add(new AssignAction(lhs, extractConcreteValue(next, rhs, false)));
+        }
 
         return actions;
     }
 
-    private ITSTerm extractConcreteValue(ProgramState next, Value value) {
+    private ITSTerm extractConcreteValue(ProgramState next, Value value, boolean isSize) {
+        if (!(value instanceof Local || value instanceof Field)) {
+            return value.asITSTerm();
+        }
+
         ITSTerm rhsTerm = new ITSNondetTerm(value.getType());
 
         try {
@@ -174,9 +203,19 @@ public class AssignStmt extends Statement {
             } else if (concreteValue.type().equals(Types.INT_PLUS_1)) {
                 rhsTerm = new ITSLiteral(1);
             } else if (concreteValue.type().equals(Types.INT_MINUS_1)) {
-                rhsTerm = new ITSLiteral(-1);
+                if (isSize) {
+                    // use absolute value when signed
+                    rhsTerm = new ITSLiteral(1);
+                } else {
+                    rhsTerm = new ITSLiteral(-1);
+                }
             } else if (!concreteValue.isUndefined()) {
-                rhsTerm = new ITSLiteral(concreteValue.getNode());
+                rhsTerm = new ITSObjectVariable(concreteValue.getNode());
+            } else if (value instanceof Local) {
+                // if we're not on the heap and a primitive type, use the variable
+                return value.asITSTerm();
+            } else {
+                System.out.println("Couldn't extract concrete value from " + value);
             }
 
         } catch (NullPointerDereferenceException ex) {

@@ -20,7 +20,19 @@ public class ITSVariable implements ITSTerm {
 
 
     private static String formatVar(SettableValue var) {
-        return var.toString().replace("$", "__");
+        String out = var.toString();
+        if (out.startsWith("obj_")) {
+            out = out.replace("obj_", "_obj_");
+        }
+        return out.replace("$", "__");
+    }
+
+    // returns null if it's not a ITSVariable
+    public static String fromFormatted(String formatted) {
+        if (formatted.startsWith("obj_")) {
+            return null;
+        }
+        return formatted.replace("__", "$").replace("_obj_", "obj_");
     }
 
 

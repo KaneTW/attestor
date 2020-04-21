@@ -58,8 +58,7 @@ public class ITSPhase extends AbstractPhase {
 
     }
 
-    //TODO: construct all invariants, including <=
-    //TODO: extract termination-relevant variables
+
     @Override
     public void logSummary() {
         if (this.result != null) {

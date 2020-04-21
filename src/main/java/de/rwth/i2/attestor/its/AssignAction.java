@@ -5,10 +5,10 @@ import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.SettableValue
 import java.util.Objects;
 
 public class AssignAction implements Action {
-    private final ITSVariable lhs;
+    private final ITSTerm lhs;
     private final ITSTerm rhs;
 
-    public ITSVariable getLhs() {
+    public ITSTerm getLhs() {
         return lhs;
     }
 
@@ -22,6 +22,11 @@ public class AssignAction implements Action {
     }
 
     public AssignAction(ITSVariable lhs, ITSTerm rhs) {
+        this.lhs = lhs;
+        this.rhs = rhs;
+    }
+
+    public AssignAction(ITSObjectVariable lhs, ITSTerm rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }
