@@ -147,39 +147,27 @@ public class AssignStmt extends Statement {
         }
 
 
-        // Handle putfield
-        if (lhs instanceof Field) {
-            HeapConfiguration heap = next.getHeap();
-            Field lhsField = (Field) lhs;
-            Local lhsOriginLocal = (Local) lhsField.getOriginValue();
+        // object case
+        if (!lhs.getType().isPrimitiveType()) {
+            // x.f = y
+            if (lhs instanceof Field) {
+                Field field = (Field)lhs;
+                Local local = (Local)field.getOriginValue();
+                actions.add(new AssignAction(local, new ITSNondetTerm(field.getType())));
 
-            // we'll constraint this using assumptions, so assume nondet for now
-            actions.add(new AssignAction(lhsOriginLocal, new ITSNondetTerm(lhsOriginLocal.getType())));
+                ITSTerm y = extractConcreteValue(next, rhs, true);
 
-            int originNode = getNodeFromConcreteValue(lhsOriginLocal.evaluateOn(next));
+                actions.add(new AssumeAction(new ITSCompareFormula(local.asITSTerm(), y, CompOp.GreaterEqual)));
+                actions.add(new AssumeAction(new ITSCompareFormula(local.asITSTerm(), new ITSBinaryTerm(local.asITSTerm(), y, IntOp.PLUS), CompOp.LessEqual)));
+            } else if (rhs instanceof Field) { // x = y.f
+                Field field = (Field)rhs;
+                Local local = (Local)field.getOriginValue();
+                actions.add(new AssignAction(lhs, new ITSNondetTerm(lhs.getType())));
 
-            if (originNode == HeapConfiguration.INVALID_ELEMENT) {
-                return actions;
-            }
-
-
-            ITSObjectVariable originVar = new ITSObjectVariable(originNode);
-            ITSTerm oldFieldVar = extractConcreteValue(previous, lhs, true);
-            ITSTerm newFieldVar = extractConcreteValue(next, rhs, true);
-
-            // find all predecessors
-            TIntArrayList preds = heap.predecessorNodesOf(originNode);
-
-            for (int i = 0; i < preds.size(); i++) {
-                int pred = preds.get(i);
-
-                ITSObjectVariable predVar = new ITSObjectVariable(pred);
-                if (!(newFieldVar instanceof ITSNondetTerm)) {
-                    actions.add(new AssumeAction(new ITSCompareFormula(new ITSBinaryTerm(originVar, newFieldVar, IntOp.PLUS), predVar, CompOp.GreaterEqual)));
-                }
-                if (!(oldFieldVar instanceof ITSNondetTerm)) {
-                    actions.add(new AssumeAction(new ITSCompareFormula(predVar, new ITSBinaryTerm(originVar, oldFieldVar, IntOp.MINUS), CompOp.GreaterEqual)));
-                }
+                actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.GreaterEqual)));
+                actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSBinaryTerm(local.asITSTerm(), new ITSLiteral(1), IntOp.MINUS), CompOp.LessEqual)));
+            } else { // x = y
+                actions.add(new AssignAction(lhs, rhs.asITSTerm()));
             }
         } else {
             actions.add(new AssignAction(lhs, extractConcreteValue(next, rhs, false)));
@@ -209,8 +197,6 @@ public class AssignStmt extends Statement {
                 } else {
                     rhsTerm = new ITSLiteral(-1);
                 }
-            } else if (!concreteValue.isUndefined()) {
-                rhsTerm = new ITSObjectVariable(concreteValue.getNode());
             } else if (value instanceof Local) {
                 // if we're not on the heap and a primitive type, use the variable
                 return value.asITSTerm();
