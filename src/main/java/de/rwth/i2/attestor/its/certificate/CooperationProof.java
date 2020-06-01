@@ -10,7 +10,8 @@ import javax.xml.bind.annotation.XmlTransient;
         SccDecompositionProof.class,
         LocationAdditionProof.class,
         NewInvariantsProof.class,
-        FreshVariableAdditionProof.class
+        FreshVariableAdditionProof.class,
+        CutTransitionSplitProof.class
 })
 public abstract class CooperationProof {
 
