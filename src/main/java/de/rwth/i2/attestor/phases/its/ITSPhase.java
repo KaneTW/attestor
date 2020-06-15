@@ -106,6 +106,10 @@ public class ITSPhase extends AbstractPhase {
         if (proof instanceof CutTransitionSplitProof) {
             CutTransitionSplitProof cutProof = (CutTransitionSplitProof) proof;
 
+            if (cutProof.getContainedCuts() == null) {
+                return Collections.emptyList(); // terminal proof object
+            }
+
             return cutProof.getContainedCuts().stream().flatMap(
                     cut -> getInvariants(graph, cut.getNextProof()).stream()
             ).collect(Collectors.toList());

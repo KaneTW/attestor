@@ -153,12 +153,17 @@ public class AssignStmt extends Statement {
             if (lhs instanceof Field) {
                 Field field = (Field)lhs;
                 Local local = (Local)field.getOriginValue();
-                actions.add(new AssignAction(local, new ITSNondetTerm(field.getType())));
+
+                ITSVariable localVar = new ITSVariable(local);
+                ITSOldVariable old = new ITSOldVariable(localVar);
+
+                actions.add(new AssignAction(old, localVar));
+                actions.add(new AssignAction(localVar, new ITSNondetTerm(field.getType())));
 
                 ITSTerm y = extractConcreteValue(next, rhs, true);
 
                 actions.add(new AssumeAction(new ITSCompareFormula(local.asITSTerm(), y, CompOp.GreaterEqual)));
-                actions.add(new AssumeAction(new ITSCompareFormula(local.asITSTerm(), new ITSBinaryTerm(local.asITSTerm(), y, IntOp.PLUS), CompOp.LessEqual)));
+                actions.add(new AssumeAction(new ITSCompareFormula(local.asITSTerm(), new ITSBinaryTerm(old, y, IntOp.PLUS), CompOp.LessEqual)));
             } else if (rhs instanceof Field) { // x = y.f
                 Field field = (Field)rhs;
                 Local local = (Local)field.getOriginValue();

@@ -2,6 +2,7 @@ package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values;
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
 import de.rwth.i2.attestor.graph.SelectorLabel;
+import de.rwth.i2.attestor.its.ITSNondetTerm;
 import de.rwth.i2.attestor.its.ITSTerm;
 import de.rwth.i2.attestor.its.ITSVariable;
 import de.rwth.i2.attestor.semantics.util.Constants;
@@ -126,7 +127,7 @@ public class Field implements SettableValue {
 
     @Override
     public ITSTerm asITSTerm() {
-        return new ITSVariable(this);
+        return new ITSNondetTerm(getType());
     }
 
     public Value getOriginValue() {

@@ -50,7 +50,7 @@ public class T2Invoker {
 
         Files.write(file, its.toString().getBytes());
 
-        Process t2 = invokeT2(dir, "--termination", "--export_cert=" + certPath, "--export_cert_hints", file.toString());
+        Process t2 = invokeT2(dir, "--termination", "--export_cert=" + certPath, file.toString());
 
         try {
             t2.waitFor(60, TimeUnit.SECONDS);

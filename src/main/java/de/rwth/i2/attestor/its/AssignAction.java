@@ -31,6 +31,11 @@ public class AssignAction implements Action {
         this.rhs = rhs;
     }
 
+    public AssignAction(ITSOldVariable lhs, ITSTerm rhs) {
+        this.lhs = lhs;
+        this.rhs = rhs;
+    }
+
     @Override
     public String toString() {
         return String.format("%s := %s;", lhs, rhs);

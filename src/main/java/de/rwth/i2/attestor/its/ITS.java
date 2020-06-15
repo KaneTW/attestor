@@ -56,12 +56,12 @@ public class ITS {
 
     // make sure state 0 is free
     private int getStateId(ProgramState ps) {
-        int id = ps.getStateSpaceId();
-        if (id < 0) {
-            throw new IllegalArgumentException("Attempted to ITS convert an invalid program state: " + ps.getStateSpaceId());
+        int id = ps.getProgramCounter();
+        if (id + 2 < 0) {
+            throw new IllegalArgumentException("Attempted to ITS convert an invalid program state: " + ps.getProgramCounter());
         }
 
-        return id + 1;
+        return id + 2;
     }
 
     private void fillITS(ITSTransition t, ProgramState ps) {

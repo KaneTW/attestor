@@ -1,5 +1,6 @@
 package de.rwth.i2.attestor.its.certificate;
 
+import de.rwth.i2.attestor.its.ITSVariable;
 import de.rwth.i2.attestor.util.SingleElementUtil;
 import org.eclipse.persistence.oxm.annotations.XmlValueExtension;
 import org.w3c.dom.Element;
@@ -30,6 +31,6 @@ public class VarExpr extends Expression {
 
     @Override
     public Set<String> getOccurringVariables() {
-        return SingleElementUtil.createSet(variableId);
+        return SingleElementUtil.createSet(ITSVariable.fromFormatted(variableId));
     }
 }
