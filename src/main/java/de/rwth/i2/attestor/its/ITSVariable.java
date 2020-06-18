@@ -25,9 +25,6 @@ public class ITSVariable implements ITSTerm {
             out = out.replace("obj_", "_obj_");
         }
 
-        if (out.endsWith("_old")) {
-            out = out.replaceFirst("_old", "_old_");
-        }
         return out.replace("$", "__");
     }
 
@@ -35,10 +32,6 @@ public class ITSVariable implements ITSTerm {
     public static String fromFormatted(String formatted) {
         if (formatted.startsWith("obj_")) {
             return null;
-        }
-
-        if (formatted.endsWith("_old")) {
-            formatted = formatted.substring(0, formatted.length() - 4);
         }
 
         if (formatted.matches("^__snapshot_[0-9]+_.*")) {

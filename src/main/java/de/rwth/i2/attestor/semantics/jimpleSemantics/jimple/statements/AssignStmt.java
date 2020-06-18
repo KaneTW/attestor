@@ -155,22 +155,26 @@ public class AssignStmt extends Statement {
                 Local local = (Local)field.getOriginValue();
 
                 ITSVariable localVar = new ITSVariable(local);
-                ITSOldVariable old = new ITSOldVariable(localVar);
+                ITSVariable fieldVar = new ITSVariable(field);
 
-                actions.add(new AssignAction(old, localVar));
-                actions.add(new AssignAction(localVar, new ITSNondetTerm(field.getType())));
+                actions.add(new AssignAction(fieldVar, new ITSNondetTerm(field.getType())));
+
+                actions.add(new AssumeAction(new ITSCompareFormula(fieldVar, new ITSLiteral(0), CompOp.GreaterEqual)));
+                actions.add(new AssumeAction(new ITSCompareFormula(fieldVar, localVar, CompOp.Less)));
 
                 ITSTerm y = extractConcreteValue(next, rhs, true);
 
-                actions.add(new AssumeAction(new ITSCompareFormula(local.asITSTerm(), y, CompOp.GreaterEqual)));
-                actions.add(new AssumeAction(new ITSCompareFormula(local.asITSTerm(), new ITSBinaryTerm(old, y, IntOp.PLUS), CompOp.LessEqual)));
+                actions.add(new AssignAction(localVar, new ITSBinaryTerm(
+                        new ITSBinaryTerm(localVar, y, IntOp.PLUS),
+                        fieldVar, IntOp.MINUS)));
+
             } else if (rhs instanceof Field) { // x = y.f
                 Field field = (Field)rhs;
                 Local local = (Local)field.getOriginValue();
                 actions.add(new AssignAction(lhs, new ITSNondetTerm(lhs.getType())));
 
                 actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.GreaterEqual)));
-                actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSBinaryTerm(local.asITSTerm(), new ITSLiteral(1), IntOp.MINUS), CompOp.LessEqual)));
+                actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), local.asITSTerm(), CompOp.Less)));
             } else { // x = y
                 actions.add(new AssignAction(lhs, rhs.asITSTerm()));
             }
