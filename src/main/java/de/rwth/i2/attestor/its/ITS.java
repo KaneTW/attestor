@@ -23,6 +23,7 @@ public class ITS {
 
 
     private Set<ITSTransition> transitions = new LinkedHashSet<>();
+    private Set<ITSTransition> outputTransitions = new LinkedHashSet<>();
 
 
     public ITS(StateSpace stateSpace, Program program, T2Invoker invoker) {
@@ -33,10 +34,11 @@ public class ITS {
         Set<ProgramState> initial = stateSpace.getInitialStates();
 
         for(ProgramState ps : initial) {
-            ITSTransition t = new ITSTransition(INITIAL_STATE, getStateId(ps), Collections.emptySet());
+            ITSTransition t = new ITSTransition(null, ps, Collections.emptySet());
 
             // add an initial state
             transitions.add(t);
+            outputTransitions.add(t);
 
             // fill the rest
             fillITS(t, ps);
@@ -51,18 +53,10 @@ public class ITS {
     }
 
     public Set<ITSTransition> getTransitions() {
-        return transitions;
+        return outputTransitions;
     }
 
     // make sure state 0 is free
-    private int getStateId(ProgramState ps) {
-        int id = ps.getProgramCounter();
-        if (id + 2 < 0) {
-            throw new IllegalArgumentException("Attempted to ITS convert an invalid program state: " + ps.getProgramCounter());
-        }
-
-        return id + 2;
-    }
 
     private void fillITS(ITSTransition t, ProgramState ps) {
         SemanticsCommand cmd = program.getStatement(ps.getProgramCounter());
@@ -75,7 +69,7 @@ public class ITS {
             for (ProgramState succ : succs) {
                 Collection<Action> actions = stmt.computeITSActions(ps, succ, invoker);
 
-                ITSTransition candidate = new ITSTransition(t.getTo(), getStateId(succ), actions);
+                ITSTransition candidate = new ITSTransition(t.getToState(), succ, actions);
 
                 if (transitions.contains(candidate)) {
                     // avoid cyclic loops
@@ -83,6 +77,10 @@ public class ITS {
                 }
 
                 transitions.add(candidate);
+
+                if (outputTransitions.stream().noneMatch(tr -> candidate.equalsOutput(tr))) {
+                    outputTransitions.add(candidate);
+                }
 
                 fillITS(candidate, succ);
 
@@ -100,7 +98,7 @@ public class ITS {
 
         sb.append(String.format("START: %d;\n\n", INITIAL_STATE));
 
-        for (ITSTransition t : transitions) {
+        for (ITSTransition t : outputTransitions) {
             sb.append(t).append("\n\n");
         }
 
