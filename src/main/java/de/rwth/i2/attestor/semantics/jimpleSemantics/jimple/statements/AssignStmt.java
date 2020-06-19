@@ -139,14 +139,6 @@ public class AssignStmt extends Statement {
         List<Action> actions = new LinkedList<>();
 
 
-        if (rhs instanceof NewExpr) {
-            actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.Greater)));
-        } else if (rhs instanceof LengthExpr) {
-            // array lengths are >= 0
-            actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.GreaterEqual)));
-        }
-
-
         // object case
         if (!lhs.getType().isPrimitiveType()) {
             // x.f = y
@@ -155,6 +147,9 @@ public class AssignStmt extends Statement {
                 Local local = (Local)field.getOriginValue();
 
                 ITSVariable localVar = new ITSVariable(local);
+
+
+
                 ITSVariable fieldVar = new ITSVariable(field);
 
                 actions.add(new AssignAction(fieldVar, new ITSNondetTerm(field.getType())));
@@ -168,6 +163,22 @@ public class AssignStmt extends Statement {
                         new ITSBinaryTerm(localVar, y, IntOp.PLUS),
                         fieldVar, IntOp.MINUS)));
 
+                // update aliased variables
+                int target = previous.getHeap().variableTargetOf(local.getName());
+                int targetVariable = previous.getHeap().variableWith(local.getName());
+
+                if (target == HeapConfiguration.INVALID_ELEMENT) {
+                    logger.error("Heap configuration does not have element " + target + " for " + local.getName() + " at transition from " + previous.getProgramCounter() + " to " + next.getProgramCounter());
+                } else {
+                    for (int predecessor : previous.getHeap().attachedVariablesOf(target).toArray()) {
+                        if (predecessor != targetVariable) {
+                            Local predLocal = new Local(local.getType(), previous.getHeap().nameOf(predecessor));
+                            actions.add(new AssignAction(predLocal, localVar));
+                        }
+                    }
+
+                }
+
             } else if (rhs instanceof Field) { // x = y.f
                 Field field = (Field)rhs;
                 Local local = (Local)field.getOriginValue();
@@ -178,8 +189,14 @@ public class AssignStmt extends Statement {
             } else { // x = y
                 actions.add(new AssignAction(lhs, rhs.asITSTerm()));
             }
+
         } else {
             actions.add(new AssignAction(lhs, extractConcreteValue(next, rhs, false)));
+        }
+
+        if (rhs instanceof LengthExpr) {
+            // array lengths are >= 0
+            actions.add(new AssumeAction(new ITSCompareFormula(lhs.asITSTerm(), new ITSLiteral(0), CompOp.GreaterEqual)));
         }
 
         return actions;
