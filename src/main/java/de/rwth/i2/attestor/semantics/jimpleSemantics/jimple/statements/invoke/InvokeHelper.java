@@ -136,6 +136,10 @@ public abstract class InvokeHelper extends SceneObject {
         programState.removeIntermediate("@return");
     }
 
+    public List<Value> getArgumentValues() {
+        return argumentValues;
+    }
+
     /**
      * separates the arguments by ,
      *

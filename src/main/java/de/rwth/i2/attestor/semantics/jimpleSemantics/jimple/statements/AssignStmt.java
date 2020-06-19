@@ -140,7 +140,7 @@ public class AssignStmt extends Statement {
 
 
         // object case
-        if (!lhs.getType().isPrimitiveType()) {
+          if (!lhs.getType().isPrimitiveType()) {
             // x.f = y
             if (lhs instanceof Field) {
                 Field field = (Field)lhs;

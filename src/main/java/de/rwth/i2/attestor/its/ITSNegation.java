@@ -1,6 +1,7 @@
 package de.rwth.i2.attestor.its;
 
 import java.util.Objects;
+import java.util.Set;
 
 public class ITSNegation implements ITSFormula {
     private final ITSFormula rhs;
@@ -25,5 +26,10 @@ public class ITSNegation implements ITSFormula {
     @Override
     public int hashCode() {
         return Objects.hash(rhs);
+    }
+
+    @Override
+    public Set<ITSVariable> occurringVariables() {
+        return rhs.occurringVariables();
     }
 }

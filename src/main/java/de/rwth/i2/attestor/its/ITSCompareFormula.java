@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.its;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 // not sure if this actually is syntactically an ITSTerm but w/e
 public class ITSCompareFormula implements ITSFormula {
@@ -32,5 +34,13 @@ public class ITSCompareFormula implements ITSFormula {
     @Override
     public int hashCode() {
         return Objects.hash(lhs, rhs, op);
+    }
+
+    @Override
+    public Set<ITSVariable> occurringVariables() {
+        HashSet<ITSVariable> out = new HashSet<>();
+        out.addAll(lhs.occurringVariables());
+        out.addAll(rhs.occurringVariables());
+        return out;
     }
 }

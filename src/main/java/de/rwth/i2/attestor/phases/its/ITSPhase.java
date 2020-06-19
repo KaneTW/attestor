@@ -11,15 +11,13 @@ import de.rwth.i2.attestor.phases.communication.InputSettings;
 import de.rwth.i2.attestor.phases.transformers.InputSettingsTransformer;
 import de.rwth.i2.attestor.phases.transformers.ProgramTransformer;
 import de.rwth.i2.attestor.phases.transformers.StateSpaceTransformer;
+import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.Local;
 import de.rwth.i2.attestor.stateSpaceGeneration.Program;
 import de.rwth.i2.attestor.stateSpaceGeneration.StateSpace;
 import de.rwth.i2.attestor.util.Pair;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ITSPhase extends AbstractPhase {
@@ -67,6 +65,11 @@ public class ITSPhase extends AbstractPhase {
                 List<List<Invariant>> invariants = getInvariants(result);
                 HashSet<String> terminationRelevantVars = new HashSet<>();
                 HashSet<String> strictTerminationRelevantVars = new HashSet<>();
+                HashSet<String> totalVars = new HashSet<>();
+
+                totalVars.addAll(getITSVars());
+
+                int totalCount = totalVars.size();
 
                 for (List<Invariant> invariantSet : invariants) {
                     logger.info("Invariants: " + invariantSet.stream().map(invariant -> invariant.toString()).collect(Collectors.joining(", ")));
@@ -75,7 +78,16 @@ public class ITSPhase extends AbstractPhase {
                 }
 
                 logger.info("Termination relevant variables: " + String.join(", ", terminationRelevantVars));
+                int relevantCount = terminationRelevantVars.size();
                 logger.info("Termination relevant variables in strict invariants: " + String.join(", ", strictTerminationRelevantVars));
+
+                totalVars.removeAll(terminationRelevantVars);
+                int irrelevantCount = totalVars.size();
+
+                logger.info("Termination irrelevant variables (emitted into ITS): " + String.join(", ", totalVars));
+
+                logger.info("Stats: " + relevantCount + " relevant, " + irrelevantCount + " irrelevant.");
+
             }
         } else {
             logger.info("Didn't run ITS");
@@ -98,6 +110,9 @@ public class ITSPhase extends AbstractPhase {
         if (proof instanceof SccDecompositionProof) {
             SccDecompositionProof sccProof = (SccDecompositionProof) proof;
 
+            if (sccProof.getContainedSccs() == null) {
+                return Collections.emptyList();
+            }
             return sccProof.getContainedSccs().stream().flatMap(
                     scc -> getInvariants(scc.getCurrentGraph(graph), scc.getNextProof()).stream()
             ).collect(Collectors.toList());
@@ -159,6 +174,18 @@ public class ITSPhase extends AbstractPhase {
         }
 
         throw new RuntimeException("Unknown proof class: " + proof.getClass());
+    }
+
+    private Set<String> getITSVars() {
+        HashSet<String> vars = new HashSet<>();
+        this.its.getTransitions().forEach(tr -> {
+            tr.getActions().forEach(action -> {
+                action.occurringVariables().forEach(var -> {
+                    if (var.getVar() instanceof Local) { vars.add(var.getVar().toString()); }
+                });
+            });
+        });
+        return vars;
     }
 
     @Override

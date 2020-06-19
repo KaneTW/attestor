@@ -2,7 +2,9 @@ package de.rwth.i2.attestor.its;
 
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.SettableValue;
 
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 
 public class ITSOldVariable implements ITSTerm {
     private final ITSVariable var;
@@ -40,5 +42,10 @@ public class ITSOldVariable implements ITSTerm {
     @Override
     public int hashCode() {
         return Objects.hash(formatted);
+    }
+
+    @Override
+    public Set<ITSVariable> occurringVariables() {
+        return Collections.emptySet();
     }
 }

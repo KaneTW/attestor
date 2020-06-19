@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.its;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class ITSDisjunction implements ITSFormula {
     private final ITSFormula lhs;
@@ -27,5 +29,13 @@ public class ITSDisjunction implements ITSFormula {
     @Override
     public int hashCode() {
         return Objects.hash(lhs, rhs);
+    }
+
+    @Override
+    public Set<ITSVariable> occurringVariables() {
+        HashSet<ITSVariable> out = new HashSet<>();
+        out.addAll(lhs.occurringVariables());
+        out.addAll(rhs.occurringVariables());
+        return out;
     }
 }

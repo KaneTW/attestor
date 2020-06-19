@@ -1,18 +1,22 @@
 package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements;
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
-import de.rwth.i2.attestor.its.Action;
-import de.rwth.i2.attestor.its.T2Invoker;
+import de.rwth.i2.attestor.its.*;
 import de.rwth.i2.attestor.main.scene.SceneObject;
 import de.rwth.i2.attestor.procedures.Method;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.invoke.InvokeCleanup;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.invoke.InvokeHelper;
+import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.SettableValue;
+import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.Value;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.util.Pair;
 import de.rwth.i2.attestor.util.SingleElementUtil;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * InvokeStmt models statements like foo(); or bar(1,2);
@@ -104,8 +108,21 @@ public class InvokeStmt extends Statement implements InvokeCleanup {
 
     @Override
     public Collection<Action> computeITSActions(ProgramState current, ProgramState next, T2Invoker invoker) {
-        System.out.println("InvokeStmt not implemented yet");
-        return super.computeITSActions(current, next, invoker);
+        List<Value> affectedValues = new ArrayList<>();
+
+        affectedValues.addAll(invokePrepare.getArgumentValues().stream().filter(value -> !value.getType().isPrimitiveType()).collect(Collectors.toList()));
+
+        List<Action> actions = new ArrayList<>();
+
+        for (Value value : affectedValues) {
+            if (!(value instanceof SettableValue)) continue; // shouldn't happen but w/e
+            actions.add(new AssignAction((SettableValue) value, new ITSNondetTerm(value.getType())));
+            if (!value.getType().isPrimitiveType()) { // only potentially true for lhs but w/e
+                actions.add(new AssumeAction(new ITSCompareFormula(value.asITSTerm(), new ITSLiteral(0), CompOp.GreaterEqual)));
+            }
+        }
+        System.out.println("InvokeStmt: all affected variables are indeterminate");
+        return  actions;
     }
 
 }

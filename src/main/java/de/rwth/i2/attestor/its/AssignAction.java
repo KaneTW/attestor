@@ -2,7 +2,9 @@ package de.rwth.i2.attestor.its;
 
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.SettableValue;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class AssignAction implements Action {
     private final ITSTerm lhs;
@@ -53,5 +55,13 @@ public class AssignAction implements Action {
     @Override
     public int hashCode() {
         return Objects.hash(lhs, rhs);
+    }
+
+    @Override
+    public Set<ITSVariable> occurringVariables() {
+        HashSet<ITSVariable> out = new HashSet<>();
+        out.addAll(lhs.occurringVariables());
+        out.addAll(rhs.occurringVariables());
+        return out;
     }
 }

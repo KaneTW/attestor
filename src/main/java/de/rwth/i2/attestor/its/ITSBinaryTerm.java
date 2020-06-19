@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.its;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class ITSBinaryTerm implements ITSTerm {
     private final ITSTerm lhs;
@@ -43,5 +45,13 @@ public class ITSBinaryTerm implements ITSTerm {
     @Override
     public int hashCode() {
         return Objects.hash(lhs, rhs, operator);
+    }
+
+    @Override
+    public Set<ITSVariable> occurringVariables() {
+        HashSet<ITSVariable> out = new HashSet<>();
+        out.addAll(lhs.occurringVariables());
+        out.addAll(rhs.occurringVariables());
+        return out;
     }
 }

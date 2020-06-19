@@ -2,10 +2,7 @@ package de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements;
 
 
 import de.rwth.i2.attestor.grammar.materialization.util.ViolationPoints;
-import de.rwth.i2.attestor.its.Action;
-import de.rwth.i2.attestor.its.AssignAction;
-import de.rwth.i2.attestor.its.ITSNondetTerm;
-import de.rwth.i2.attestor.its.T2Invoker;
+import de.rwth.i2.attestor.its.*;
 import de.rwth.i2.attestor.main.scene.SceneObject;
 import de.rwth.i2.attestor.procedures.Method;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.invoke.InvokeCleanup;
@@ -13,12 +10,14 @@ import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.statements.invoke.In
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.ConcreteValue;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.NullPointerDereferenceException;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.SettableValue;
+import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.Value;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
 import de.rwth.i2.attestor.util.SingleElementUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * AssignInvoke models statements of the form x = foo(); or x = bar(3, name);
@@ -142,7 +141,23 @@ public class AssignInvoke extends Statement implements InvokeCleanup {
 
     @Override
     public Collection<Action> computeITSActions(ProgramState current, ProgramState next, T2Invoker invoker) {
-        System.out.println("AssignInvoke not implemented yet");
-        return SingleElementUtil.createSet(new AssignAction(lhs, new ITSNondetTerm(lhs.getType())));
+
+
+        List<Value> affectedValues = new ArrayList<>();
+        affectedValues.add(lhs);
+
+        affectedValues.addAll(invokePrepare.getArgumentValues().stream().filter(value -> !value.getType().isPrimitiveType()).collect(Collectors.toList()));
+
+        List<Action> actions = new ArrayList<>();
+
+        for (Value value : affectedValues) {
+            if (!(value instanceof SettableValue)) continue; // shouldn't happen but w/e
+            actions.add(new AssignAction((SettableValue) value, new ITSNondetTerm(value.getType())));
+            if (!value.getType().isPrimitiveType()) { // only potentially true for lhs but w/e
+                actions.add(new AssumeAction(new ITSCompareFormula(value.asITSTerm(), new ITSLiteral(0), CompOp.GreaterEqual)));
+            }
+        }
+        System.out.println("AssignInvoke: all affected variables are indeterminate");
+        return  actions;
     }
 }

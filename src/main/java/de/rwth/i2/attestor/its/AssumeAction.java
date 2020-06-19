@@ -1,6 +1,7 @@
 package de.rwth.i2.attestor.its;
 
 import java.util.Objects;
+import java.util.Set;
 
 public class AssumeAction implements Action {
     private final ITSFormula expr;
@@ -29,5 +30,10 @@ public class AssumeAction implements Action {
     @Override
     public int hashCode() {
         return Objects.hash(expr);
+    }
+
+    @Override
+    public Set<ITSVariable> occurringVariables() {
+        return expr.occurringVariables();
     }
 }

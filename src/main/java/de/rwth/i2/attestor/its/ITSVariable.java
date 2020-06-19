@@ -1,8 +1,10 @@
 package de.rwth.i2.attestor.its;
 
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.SettableValue;
+import de.rwth.i2.attestor.util.SingleElementUtil;
 
 import java.util.Objects;
+import java.util.Set;
 
 public class ITSVariable implements ITSTerm {
     private final SettableValue var;
@@ -66,5 +68,10 @@ public class ITSVariable implements ITSTerm {
     @Override
     public int hashCode() {
         return Objects.hash(formatted);
+    }
+
+    @Override
+    public Set<ITSVariable> occurringVariables() {
+        return SingleElementUtil.createSet(this);
     }
 }

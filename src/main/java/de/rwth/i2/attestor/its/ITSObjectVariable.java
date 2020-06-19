@@ -1,6 +1,8 @@
 package de.rwth.i2.attestor.its;
 
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 
 public class ITSObjectVariable implements ITSTerm {
     private final int node;
@@ -38,5 +40,10 @@ public class ITSObjectVariable implements ITSTerm {
     @Override
     public int hashCode() {
         return Objects.hash(formatted);
+    }
+
+    @Override
+    public Set<ITSVariable> occurringVariables() {
+        return Collections.emptySet();
     }
 }
