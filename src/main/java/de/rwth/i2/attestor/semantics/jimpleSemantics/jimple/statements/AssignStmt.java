@@ -6,6 +6,7 @@ import de.rwth.i2.attestor.graph.SelectorLabel;
 import de.rwth.i2.attestor.graph.heap.HeapConfiguration;
 import de.rwth.i2.attestor.its.*;
 import de.rwth.i2.attestor.main.scene.SceneObject;
+import de.rwth.i2.attestor.markingGeneration.Markings;
 import de.rwth.i2.attestor.semantics.jimpleSemantics.jimple.values.*;
 import de.rwth.i2.attestor.semantics.util.DeadVariableEliminator;
 import de.rwth.i2.attestor.stateSpaceGeneration.ProgramState;
@@ -171,10 +172,14 @@ public class AssignStmt extends Statement {
                     logger.error("Heap configuration does not have element " + target + " for " + local.getName() + " at transition from " + previous.getProgramCounter() + " to " + next.getProgramCounter());
                 } else {
                     for (int predecessor : previous.getHeap().attachedVariablesOf(target).toArray()) {
-                        if (predecessor != targetVariable) {
-                            Local predLocal = new Local(local.getType(), previous.getHeap().nameOf(predecessor));
-                            actions.add(new AssignAction(predLocal, localVar));
-                        }
+                        if (predecessor == targetVariable) continue;
+
+                        String predName = previous.getHeap().nameOf(predecessor);
+                        if (Markings.isMarking(predName))  continue;
+
+                        Local predLocal = new Local(local.getType(), predName);
+                        actions.add(new AssignAction(predLocal, localVar));
+
                     }
 
                 }
